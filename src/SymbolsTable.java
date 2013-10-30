@@ -54,7 +54,6 @@ public class SymbolsTable {
 	 * @see SymbolsTable#variables
 	 */
 	public void addVariable(String[] newVar) {
-		//System.out.println("Adding "+newVariable[0]+"; "+newVariable[1]);
 		if(!this.variables.contains(newVar[0])){
 			this.variables.add(newVar[0]);
 			this.variables.add(newVar[1]);
@@ -80,7 +79,6 @@ public class SymbolsTable {
 	 * @see SymbolsTable#labels
 	 */
 	public void addLabel(String[] newLab) {
-		//System.out.println("Adding "+newLab[0]+"; "+newLab[1]);
 		if(this.labels.contains(newLab[0])) {
 			if(!this.labels.get(this.labels.lastIndexOf(newLab[0])+1).equals(newLab[1])) {
 				this.labels.add(newLab[0]);
@@ -122,12 +120,10 @@ public class SymbolsTable {
 	private void sortList(List<String> list) {
 		boolean ordered = false;
 		int size = list.size();
-		//System.out.println("Size="+size);
 		String temp[] = {"",""};
 		while(!ordered) {
 			ordered = true;
 			for(int i=0;i<size-3;i++) {
-				System.out.println("i="+i);
 				if(list.get(i).compareTo(list.get(i+2)) > 0) {
 					//Note that add and remove shift the rest of the ArrayList
 					temp[0] = list.get(i+2);

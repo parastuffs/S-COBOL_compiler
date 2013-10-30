@@ -1,0 +1,48 @@
+display 'Friendship is magic!'.
+display 9.9.
+display 'fdFr5-?+*/:!' Rainbows.
+identification division.
+program-id. Algo-Euclide.
+author. Euclide.
+date-written. 300 BNC.
+environment division.
+configuration section.
+source-computer. x8086.
+object-computer. LLVM.
+data division.
+working-storage section.
+77 a s9(5).
+/s for signed.
+77 b s9(5).
+/9 for digit (int).
+77 c s9(5).
+/(5) for 5 digits.
+procedure division.
+/code of our program.
+main section.
+* Euclide’s Algorithm.
+start.
+/The first label is the start point.
+accept a.
+/read int from stdin and put it into a.
+accept b.
+/read int from stdin and put it into b.
+perform find until b = 0./call find label until b equals 0.
+display ’valeur:’.
+/write ’valeur:’ on stdout.
+display a.
+/write the content of a on stdout.
+stop run.
+/stop the program.
+find.
+/create a label called ’find’.
+move c to b.
+perform diff until a < b./call diff label until a is less than b.
+move a to b.
+/put the value of a into b.
+move c to a.
+/put the value of c into a.
+diff.
+/create a label called ’diff’.
+* Compute a modulo b
+substract b from a.

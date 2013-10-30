@@ -47,10 +47,7 @@ public class Main {
 			lexCouple[1] = "";
 			while(!str.isEmpty() && lexCouple[1]!="ERROR") {
 				lexCouple = lex.nextToken(str,newString,lineNum);
-				//System.out.println("Couple returned: {"+lexCouple[0]+","+lexCouple[1]+"}");
-				//System.out.println("Before escaping: '"+lexCouple[0]+"'");
 				lexCouple[0] = espaceChar(lexCouple[0]);
-				//System.out.println("After escaping: '"+lexCouple[0]+"'");
 				str = str.replaceFirst(lexCouple[0], "");
 				str = str.replaceFirst("^\\ ", "");
 				lexCouple[0] = unEscpaceChar(lexCouple[0]);
@@ -61,7 +58,6 @@ public class Main {
 					System.out.println("token: '"+lexCouple[0]+"'	lexical unit: '"
 							+lexCouple[1]+"'");
 				}
-				//System.out.println("What's left: '"+str+"'");
 				newString = false;
 			}
 			lineNum++;
@@ -103,6 +99,8 @@ public class Main {
 		input = input.replaceAll("\\)", "[)]");
 		input = input.replaceAll("\\*", "[*]");
 		input = input.replaceAll("\\?", "[?]");
+		input = input.replaceAll("\\+", "[+]");
+		input = input.replaceAll("\\-", "[-]");
 		return input;
 	}
 }

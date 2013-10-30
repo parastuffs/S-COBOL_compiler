@@ -74,26 +74,6 @@ public class LexicalAnalyzer {
 				"DISPLAY_KEYWORD","FROM_KEYWORD","BY_KEYWORD"));
 
 		this.symTab = new SymbolsTable();
-		//this.label = {"",""};
-		//this.variable = {"",""};
-		/* On pourrait rencontrer un problème si on lit un simple '9', est-ce une image ou
-		 * un réel ? Il va falloir prendre une décision et justifier ce choix dans le rapport
-		 * On peut aussi penser à un nouvel identifiant qui peut être soit une image, soit
-		 * un réel et décider du quel utiliser lors de l'analyse sémantique.
-		 */
-		
-		//boolean bool = isIdentifier("1");
-		//System.out.println(bool);
-		
-		//System.out.println(isImage("s9(5)v9(2)"));
-		
-		//System.out.println(isInteger("+9"));
-		
-		//System.out.println(isReal("-8093.0"));
-		
-		//System.out.println(isString("'fdFr5-?+*/:!'"));
-		
-		//System.out.println(isString("'This is SPARTA'"));
 	}
 	
 	/**
@@ -126,7 +106,7 @@ public class LexicalAnalyzer {
 	 * @return True if the input matches the regex.
 	 */
 	private boolean isInteger(String input) {
-		return input.matches("[\\+\\-]?([0-9])|([1-9][0-9]*)");
+		return input.matches("(0)|([\\+\\-]?[1-9][0-9]*)");
 	}
 
 	/**
@@ -137,7 +117,7 @@ public class LexicalAnalyzer {
 	 * @return True if the input matches the regex.
 	 */
 	private boolean isReal(String input) {
-		return input.matches("[\\+\\-]?[1-9][0-9]*(\\.[0-9]+)?");
+		return input.matches("((0)|([\\+\\-]?[1-9][0-9]*))(\\.[0-9]+)?");
 	}
 
 	/**
@@ -159,8 +139,7 @@ public class LexicalAnalyzer {
 	 * @return True if the input matches the regex.
 	 */
 	private boolean isComment(String input, boolean newLine) {
-		//System.out.println("In 'iscomment()': input='"+input+"'");
-		return (newLine && (input.matches("\\*.*\n$") || input.matches("/.*\n$")));
+		return (newLine && (input.matches("((\\*)|(/)).*\n$")));
 	}
 	
 	
@@ -195,26 +174,22 @@ public class LexicalAnalyzer {
 	 * @see SymbolsTable#addVariable
 	 */
 	public String[] nextToken(String input, boolean newLine, int lineNum) {
-		//System.out.println("Entry: input='"+input+"', newLine="+newLine);
 		String[] couple = {"",""};
 		int n;
 		
 		//Comment line
 		if(isComment(input,newLine)) {
-			//System.out.println("Comment");
 			couple[0] = input;
 			couple[1] = "COMMENT";
 		}
 		
 		else {
 			String sub[] = input.split(" ");
-			//System.out.println("sub length="+sub.length);
 			boolean found = false;
 			for(int i=0;i<sub.length && !found;i++) {
 				couple[0] = "";
 				//Successive concatenation
 				for(int j=0;j<=i;j++) {
-					//System.out.println("sub[j]="+sub[j]);
 					couple[0] += sub[j];
 					if(j<i) {//If it's not the last piece
 						couple[0] += " ";
@@ -223,7 +198,8 @@ public class LexicalAnalyzer {
 				
 				//The identifier may end with a dot or dot+\n:
 				if(couple[0].matches(".+\\.$") || couple[0].matches(".+\\.\\n$")) {
-					couple[0] = couple[0].substring(0, couple[0].indexOf("."));
+					//Beware, lastIndexOf(".") because there may be a decimal number.
+					couple[0] = couple[0].substring(0, couple[0].lastIndexOf("."));
 				}
 				//Dot + \n -> end_of_instruction
 				if(input.matches("^\\.\n$")) {
