@@ -123,7 +123,7 @@ through state elimination.
 	\node[state,accepting](q_7)[below of=q_6]{$q_7$};
 	\node[state](q_8)[below of=q_7]{$q_8$};
 	\node[state](q_9)[left of=q_8]{$q_9$};
-	\node[state,accepting](q_10)[left of=q_9]{$q_10$};
+	\node[state,accepting](q_10)[left of=q_9]{$q_{10}$};
 
 	\path
 	(q_0) edge 	node {s} (q_1)
@@ -304,10 +304,7 @@ Since \texttt{a $\oplus$ b} is equivalent to the extended regular expression \te
 \end{figure}
 \begin{itemize}
 	\item $q_0 \rightarrow q_2$
-		Same result as for the integer:
-		\begin{center}
-			$\ldbrack+ \oplus - \oplus \epsilon\rdbrack[1-9] \ldbrack\epsilon \oplus [0-9]*\rdbrack$
-		\end{center}
+		Same result as for the integer.
 
 	\item $q_0 \rightarrow q_6$
 	\begin{tikzpicture}[shorten >=1pt, node distance=6cm,on grid,auto,->, >=stealth']
@@ -331,7 +328,7 @@ Since \texttt{a $\oplus$ b} is equivalent to the extended regular expression \te
 		\oplus \ldbrack \epsilon \oplus .[0-9][0-9]^* \rdbrack
 \end{equation}
 
-Knowing that \texttt{$AA^*$} is equivalent to the extended regular expression \texttt{A+}, we have:
+Knowing that \verb|AA*| is equivalent to the extended regular expression \texttt{A+}, we have:
 \begin{center}
 	\texttt{(0 | [+-]?[1-9][0-9]*)(.[0-9]+)?}
 \end{center}
