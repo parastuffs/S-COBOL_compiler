@@ -1,0 +1,104 @@
+\documentclass[a4paper,11pt]{article}
+ 
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{
+		body={170mm,230mm},
+		left=25mm,top=25mm,
+		headheight=25mm,headsep=7mm,
+		marginparsep=4mm,
+		marginparwidth=20mm,
+		footnotesep=50mm
+}
+\usepackage{enumitem}
+\setlist{noitemsep}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathabx}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning,arrows}
+\usepackage{verbatim}
+\usepackage{longtable}
+\usepackage{array}
+
+\newcounter{rule}
+\newcommand{\addRule}[2]{%
+	\stepcounter{rule} [\arabic{rule}] & #1 & $\rightarrow$ & #2 \tabularnewline
+}
+ 
+\begin{document}
+
+\begin{longtable}{lll>{\raggedright}p{10cm}}
+	\addRule{<PROGRAM>}{<IDENT><ENV><DATA><PROC>}
+	\addRule{<IDENT>}{identification division <END\_INST> program-id. ID<END\_INST> author. WORDS<END\_INST> date-written. WORDS <END\_INST>}
+	\addRule{<WORDS>}{ID <WORDS\_LR>}
+	\addRule{<WORDS\_LR>}{ID <WORDS\_LR}
+	\addRule{}{$\varepsilon$}
+	\addRule{}{ID}
+	\addRule{<END\_INST>}{.\textbackslash n}
+	\addRule{<ENV>}{environment division<END\_INST> configuration section<END\_INST> source-computer. WORDS<END\_INST> object-computer. WORDS<END\_INST>
+	}
+	\addRule{<DATA>}{data division<END\_INST> working-storage section<END\_INST> <VAR\_LIST>}
+	\addRule{<VAR\_LIST>}{<VAR\_DECL> <VAR\_LIST>}
+	\addRule{}{$\varepsilon$}
+	\addRule{<VAR\_DECL>}{<LEVEL> ID pic IMAGE <VAR\_DECL\_TAIL>}
+	\addRule{<VAR\_DECL\_TAIL>}{value INTEGER<END\_INST>}
+	\addRule{}{value INTEGER<END\_INST>}
+	\addRule{<LEVEL>}{INTEGER}
+	\addRule{<PROC>}{procedure division<END\_INST> ID section<END\_INST> <LABELS> end program ID.}
+	\addRule{<LABELS>}{<LABEL><END\_INST> <INSTRUCTION\_LIST> <LABELS\_LR>}
+	\addRule{<LABELS\_LR>}{<LABEL><END\_INST> <INSTRUCTION\_LIST> <LABELS\_LR>}
+	\addRule{}{$\varepsilon$}
+	\addRule{}{<LABEL><END\_INST> <INSTRUCTION\_LIST>}
+	\addRule{<LABEL>}{ID}
+	\addRule{<INSTRUCTION\_LIST>}{<INSTRUCTION> <INSTRUCTIONLIST>}
+	\addRule{}{$\varepsilon$}
+	\addRule{<INSTRUCTIONS>}{<ASSIGNATION>}
+	\addRule{}{<IF>}
+	\addRule{}{<CALL>}
+	\addRule{}{<READ>}
+	\addRule{}{<WRITE>}
+	\addRule{}{stop run<END\_INST>}
+	\addRule{<ASSIGNATION>}{move <EXPRESSION> to ID<END\_INST>}
+	\addRule{}{compute ID = <EXPRESSION><END\_INST>}
+	\addRule{}{add <EXPRESSION> to ID<END\_INST>}
+	\addRule{}{subtract <EXPRESSION> from ID<END\_INST>}
+	\addRule{}{multiply <ASSING\_END><END\_INST>}
+	\addRule{}{divide <ASSING\_END><END\_INST>}
+	\addRule{<ASSIGN\_END>}{<EXPRESSION>,<EXPRESSION> giving ID}
+	\addRule{<EXPRESSION>}{<EXPRESSION> <OP> <EXPRESSION>}
+	\addRule{}{(<EXPRESSION>)}
+	\addRule{}{– <EXPRESSION>}
+	\addRule{}{not <EXPRESSION>}
+	\addRule{}{ID}
+	\addRule{}{INTEGER}
+	\addRule{}{true}
+	\addRule{}{false}
+	\addRule{<OP>}{=}
+	\addRule{}{<}
+	\addRule{}{>}
+	\addRule{}{<=}
+	\addRule{}{>=}
+	\addRule{}{and}
+	\addRule{}{or}
+	\addRule{}{+}
+	\addRule{}{-}
+	\addRule{}{*}
+	\addRule{}{/}
+	\addRule{<IF>}{if <EXPRESSION> then <INSTRUCTION\_LIST> <IF\_END>}
+	\addRule{<IF\_END>}{else <INSTRUCTION\_LIST> end-if}
+	\addRule{}{end-if}
+	\addRule{<CALL>}{perform ID <CALL\_TAIL>}
+	\addRule{<CALL\_TAIL>}{until <EXPRESSION><END\_INST>}
+	\addRule{}{<END\_INST>}
+	\addRule{<READ>}{accept ID<END\_INST>}
+	\addRule{<WRITE>}{display <WRITE\_TAIL>}
+	\addRule{<WRITE\_TAIL>}{<EXPRESSION><END\_INST>}
+	\addRule{}{STRING<END\_INST>}
+
+\end{longtable}
+
+\end{document}

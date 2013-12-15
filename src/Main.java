@@ -12,6 +12,16 @@ import java.util.Scanner;
  */
 public class Main {
 
+	//TODO support tab at the beginning of the line and at the end too.
+	//TODO should not reject (9). -> operation, not image
+	//TODO variables field empty
+	//TODO ne pas confondre label et variable
+	//-> label = reference de declaration
+	//+0.5 éventuel.
+	//TODO report : definir les symboles utilises
+	//TODO introduction et conclusion.
+	
+	
 	/**
 	 * <p>Executed method.</p>
 	 * <p>This method creates the lexical analyzer, then ask the
