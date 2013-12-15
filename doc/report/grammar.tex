@@ -35,9 +35,8 @@
 	\addRule{<PROGRAM>}{<IDENT><ENV><DATA><PROC>}
 	\addRule{<IDENT>}{identification division <END\_INST> program-id. ID<END\_INST> author. WORDS<END\_INST> date-written. WORDS <END\_INST>}
 	\addRule{<WORDS>}{ID <WORDS\_LR>}
-	\addRule{<WORDS\_LR>}{ID <WORDS\_LR}
+	\addRule{<WORDS\_LR>}{ID <WORDS\_LR>}
 	\addRule{}{$\varepsilon$}
-	\addRule{}{ID}
 	\addRule{<END\_INST>}{.\textbackslash n}
 	\addRule{<ENV>}{environment division<END\_INST> configuration section<END\_INST> source-computer. WORDS<END\_INST> object-computer. WORDS<END\_INST>
 	}
@@ -46,17 +45,16 @@
 	\addRule{}{$\varepsilon$}
 	\addRule{<VAR\_DECL>}{<LEVEL> ID pic IMAGE <VAR\_DECL\_TAIL>}
 	\addRule{<VAR\_DECL\_TAIL>}{value INTEGER<END\_INST>}
-	\addRule{}{value INTEGER<END\_INST>}
+	\addRule{}{<END\_INST>}
 	\addRule{<LEVEL>}{INTEGER}
 	\addRule{<PROC>}{procedure division<END\_INST> ID section<END\_INST> <LABELS> end program ID.}
 	\addRule{<LABELS>}{<LABEL><END\_INST> <INSTRUCTION\_LIST> <LABELS\_LR>}
 	\addRule{<LABELS\_LR>}{<LABEL><END\_INST> <INSTRUCTION\_LIST> <LABELS\_LR>}
 	\addRule{}{$\varepsilon$}
-	\addRule{}{<LABEL><END\_INST> <INSTRUCTION\_LIST>}
 	\addRule{<LABEL>}{ID}
 	\addRule{<INSTRUCTION\_LIST>}{<INSTRUCTION> <INSTRUCTIONLIST>}
 	\addRule{}{$\varepsilon$}
-	\addRule{<INSTRUCTIONS>}{<ASSIGNATION>}
+	\addRule{<INSTRUCTION>}{<ASSIGNATION>}
 	\addRule{}{<IF>}
 	\addRule{}{<CALL>}
 	\addRule{}{<READ>}
@@ -76,7 +74,7 @@
 	\addRule{<EXP\_AND\_LR>}{and <EXP\_EQUAL> <EXP\_AND\_LR>}
 	\addRule{}{$\varepsilon$}
 	\addRule{<EXP\_EQUAL>}{<EXP\_ADD> <EXP\_EQUAL\_LR>}
-	\addRule{}{= <EXP\_ADD> <EXP\_EQUAL\_LR>}
+	\addRule{<EXP\_EQUAL\_LR>}{= <EXP\_ADD> <EXP\_EQUAL\_LR>}
 	\addRule{}{< <EXP\_ADD> <EXP\_EQUAL\_LR>}
 	\addRule{}{> <EXP\_ADD> <EXP\_EQUAL\_LR>}
 	\addRule{}{<= <EXP\_ADD> <EXP\_EQUAL\_LR>}
@@ -109,6 +107,51 @@
 	\addRule{<WRITE>}{display <WRITE\_TAIL>}
 	\addRule{<WRITE\_TAIL>}{<EXPRESSION><END\_INST>}
 	\addRule{}{STRING<END\_INST>}
+
+\end{longtable}
+
+\begin{longtable}{lp{6cm}p{6cm}}
+	Variable & First\textsuperscript{1} & Follow\textsuperscript{1} \\ \hline
+	<PROGRAM> & first(<IDENT>) & \\
+	<IDENT> & identification & \\
+	<WORDS> & ID & \\
+	<WORDS\_LR> & ID, follow(<WORDS>) & \\
+	<END\_INST> & . & \\
+	<ENV> & environment & \\
+	<DATA> & data & \\
+	<VAR\_LIST> & first(<VAR\_DECL>), $\varepsilon$ & \\
+	<VAR\_DECL> & first(<LEVEL>) & \\
+	<VAR\_DECL\_TAIL> & value, <END\_INST> & \\
+	<LEVEL> & INTEGER & \\
+	<PROC> & procedure & \\
+	<LABELS> & first(<LABEL>) & \\
+	<LABELS\_LR> & first(<LABEL>), $\varepsilon$ & \\
+	<LABEL> & ID & \\
+	<INSTRUCTION\_LIST> & first(<INSTRUCTION>), $\varepsilon$ & \\
+	<INSTRUCTION> & first(<ASSIGNATION>, <IF>, CALL, READ, WRITE), stop & \\
+	<ASSIGNATION> & move, compute, add, substract, multiply, divide & \\
+	<ASSIGN\_END> & first(EXPRESSION) & \\
+	<EXPRESSION> & first(EXP\_AND) & \\
+	<EXPRESSION\_LR> & of, $\varepsilon$ & \\
+	<EXP\_AND> & first(EXP\_EQUAL) & \\
+	<EXP\_AND\_LR> & and, $\varepsilon$ & \\
+	<EXP\_EQUAL> & first(EXP\_ADD) & \\
+	<EXP\_EQUAL\_LR> & =, <, >, <=, >=, $\varepsilon$ & \\
+	<EXP\_ADD> & first(EXP\_MULT) & \\
+	<EXP\_ADD\_LR> & +, -, $\varepsilon$ & \\
+	<EXP\_MULT> & first(EXP\_NOT) & \\
+	<EXP\_MULT\_LR> & *, /, $\varepsilon$ & \\
+	<EXP\_NOT> & -, not, first(EXP\_PARENTHESIS) & \\
+	<EXP\_PARENTHESIS> & (, first(EXP\_TERM) & \\
+	<EXP\_TERM> & ID, INTEGER, true, false & \\
+	<IF> & if & \\
+	<IF\_END> & else, end-if & \\
+	<CALL> & perform & \\
+	<CALL\_TAIL> & until, first(END\_INST) & \\
+	<READ> & accept & \\
+	<WRITE> & display & \\
+	<WRITE\_TAIL> & first(EXPRESSION), STRING & \\
+
 
 \end{longtable}
 
