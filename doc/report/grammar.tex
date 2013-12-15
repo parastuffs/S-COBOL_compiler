@@ -69,25 +69,36 @@
 	\addRule{}{multiply <ASSING\_END><END\_INST>}
 	\addRule{}{divide <ASSING\_END><END\_INST>}
 	\addRule{<ASSIGN\_END>}{<EXPRESSION>,<EXPRESSION> giving ID}
-	\addRule{<EXPRESSION>}{<EXPRESSION> <OP> <EXPRESSION>}
-	\addRule{}{(<EXPRESSION>)}
-	\addRule{}{– <EXPRESSION>}
-	\addRule{}{not <EXPRESSION>}
-	\addRule{}{ID}
+	\addRule{<EXPRESSION>}{<EXP\_AND> <EXPRESSION\_LR>}
+	\addRule{<EXPRESSION\_LR>}{or <EXP\_AND> <EXPRESSION\_LR>}
+	\addRule{}{$\varepsilon$}
+	\addRule{<EXP\_AND>}{<EXP\_EQUAL> <EXP\_AND\_LR>}
+	\addRule{<EXP\_AND\_LR>}{and <EXP\_EQUAL> <EXP\_AND\_LR>}
+	\addRule{}{$\varepsilon$}
+	\addRule{<EXP\_EQUAL>}{<EXP\_ADD> <EXP\_EQUAL\_LR>}
+	\addRule{}{= <EXP\_ADD> <EXP\_EQUAL\_LR>}
+	\addRule{}{< <EXP\_ADD> <EXP\_EQUAL\_LR>}
+	\addRule{}{> <EXP\_ADD> <EXP\_EQUAL\_LR>}
+	\addRule{}{<= <EXP\_ADD> <EXP\_EQUAL\_LR>}
+	\addRule{}{>= <EXP\_ADD> <EXP\_EQUAL\_LR>}
+	\addRule{}{$\varepsilon$}
+	\addRule{<EXP\_ADD>}{<EXP\_MULT> <EXP\_ADD\_LR>}
+	\addRule{<EXP\_ADD\_LR>}{+ <EXP\_MULT> <EXP\_ADD\_LR>}
+	\addRule{}{- <EXP\_MULT> <EXP\_ADD\_LR>}
+	\addRule{}{$\varepsilon$}
+	\addRule{<EXP\_MULT>}{<EXP\_NOT> <EXP\_MULT\_LR>}
+	\addRule{<EXP\_MULT\_LR>}{* <EXP\_NOT> <EXP\_MULT\_LR>}
+	\addRule{}{/ <EXP\_NOT> <EXP\_MULT\_LR>}
+	\addRule{}{$\varepsilon$}
+	\addRule{<EXP\_NOT>}{-<EXP\_NOT>}
+	\addRule{}{not <EXP\_NOT>}
+	\addRule{}{<EXP\_PARENTHESIS>}
+	\addRule{<EXP\_PARENTHESIS>}{(<EXPRESSION>)}
+	\addRule{}{<EXP\_TERM>}
+	\addRule{<EXP\_TERM>}{ID}
 	\addRule{}{INTEGER}
 	\addRule{}{true}
 	\addRule{}{false}
-	\addRule{<OP>}{=}
-	\addRule{}{<}
-	\addRule{}{>}
-	\addRule{}{<=}
-	\addRule{}{>=}
-	\addRule{}{and}
-	\addRule{}{or}
-	\addRule{}{+}
-	\addRule{}{-}
-	\addRule{}{*}
-	\addRule{}{/}
 	\addRule{<IF>}{if <EXPRESSION> then <INSTRUCTION\_LIST> <IF\_END>}
 	\addRule{<IF\_END>}{else <INSTRUCTION\_LIST> end-if}
 	\addRule{}{end-if}
