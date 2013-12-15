@@ -113,46 +113,48 @@
 \begin{longtable}{l>{\raggedright}p{6cm}p{6cm}}
 	Variable & First\textsuperscript{1} & Follow\textsuperscript{1} \\ \hline
 	<PROGRAM> & identification & \\
-	<IDENT> & identification & first(ENV)\\
-	<WORDS> & ID & first(END\_INST)\\
-	<WORDS\_LR> & ID, $\varepsilon$ & follow(WORDS)\\
-	<END\_INST> & . & program-id, date-written, follow(IDENT), configuration, source-computer, object-computer, follow(ENV), working-storage, follow(VAR\_DELC\_TAIL>), ID, first(LABELS), first(INSTRUCTION\_LIST), follow(INSTRUCTION), follow(ASSIGNATION), follow(CALL\_TAIL), follow(WRITE\_TAIL, READ)\\
-	<ENV> & environment & first(DATA)\\
-	<DATA> & data & first(PROC)\\
-	<VAR\_LIST> & INTEGER, $\varepsilon$ & follow(DATA) \\
-	<VAR\_DECL> & INTEGER & first(VAR\_LIST)\\
-	<VAR\_DECL\_TAIL> & value, . & follow(VAR\_DECL) \\
+	<IDENT> & identification & environment\\
+	<WORDS> & ID & .\\
+	<WORDS\_LR> & ID, $\varepsilon$ & .\\
+	<END\_INST> & . & program-id, date-written, environment, configuration, source-computer, object-computer, data, working-storage, INTEGER, $\varepsilon$, ID, move, compute, add, substract, multiply, divide, if, perform, accept, display, stop\\
+	<ENV> & environment & data\\
+	<DATA> & data & procedure\\
+	<VAR\_LIST> & INTEGER, $\varepsilon$ & procedure \\
+	<VAR\_DECL> & INTEGER & INTEGER, $\varepsilon$ \\
+	<VAR\_DECL\_TAIL> & value, . & INTEGER, $\varepsilon$ \\
 	<LEVEL> & INTEGER & ID\\
-	<PROC> & procedure & follow(PROGRAM)\\
+	<PROC> & procedure & \\
 	<LABELS> & ID & end\\
-	<LABELS\_LR> & ID, $\varepsilon$ & follow(LABELS)\\
-	<LABEL> & ID & first(END\_INST)\\
-	<INSTRUCTION\_LIST> & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ & first(LABELS\_LR)\\
-	<INSTRUCTION> & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop & first(INSTRUCTION\_LIST)\\
-	<ASSIGNATION> & move, compute, add, substract, multiply, divide & follow(INSTRUCTION) \\
-	<ASSIGN\_END> & -, not, (, ID, INTEGER, true, false & first(END\_INST)\\
-	<EXPRESSION> & -, not, (, ID, INTEGER, true, false & to, first(END\_INST), from, , , giving, ) then\\
-	<EXPRESSION\_LR> & or, $\varepsilon$ & follow(EXPRESSION)\\
-	<EXP\_AND> & -, not, (, ID, INTEGER, true, false & first(EXPRESSION\_LR)\\
-	<EXP\_AND\_LR> & and, $\varepsilon$ & follow(EXP\_AND)\\
-	<EXP\_EQUAL> & -, not, (, ID, INTEGER, true, false & first(EXP\_AND\_LR)\\
-	<EXP\_EQUAL\_LR> & =, <, >, <=, >=, $\varepsilon$ & follow(EXP\_EQUAL)\\
-	<EXP\_ADD> & -, not, (, ID, INTEGER, true, false & first(EXP\_EQUAL\_LR)\\
-	<EXP\_ADD\_LR> & +, -, $\varepsilon$ & follow(EXP\_ADD)\\
-	<EXP\_MULT> & -, not, (, ID, INTEGER, true, false & first(EXP\_ADD\_LR)\\
-	<EXP\_MULT\_LR> & *, /, $\varepsilon$ & follow(EXP\_MULT)\\
-	<EXP\_NOT> & -, not, (, ID, INTEGER, true, false & first(EXP\_MULT\_LR)\\
-	<EXP\_PARENTHESIS> & (, ID, INTEGER, true, false & follow(EXP\_NOT)\\
-	<EXP\_TERM> & ID, INTEGER, true, false & follow(EXP\_PARENTHESIS)\\
-	<IF> & if & follow(INSTRUCTION)\\
-	<IF\_END> & else, end-if & follow(IF)\\
-	<CALL> & perform & follow(INSTRUCTION)\\
-	<CALL\_TAIL> & until, . & follow(CALL)\\
-	<READ> & accept & follow(INSTRUCTION)\\
-	<WRITE> & display & follow(INSTRUCTION)\\
-	<WRITE\_TAIL> & STRING, -, not, (, ID, INTEGER, true, false & follow(WRITE) \\
-
+	<LABELS\_LR> & ID, $\varepsilon$ & end\\
+	<LABEL> & ID & .\\
+	<INSTRUCTION\_LIST> & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ & ID, $\varepsilon$\\
+	<INSTRUCTION> & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop &  move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
+	<ASSIGNATION> & move, compute, add, substract, multiply, divide & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
+	<ASSIGN\_END> & -, not, (, ID, INTEGER, true, false & .\\
+	<EXPRESSION> & -, not, (, ID, INTEGER, true, false & to, ., from, , , giving, ), then\\
+	<EXPRESSION\_LR> & or, $\varepsilon$ & to, ., from, , , giving, ), then\\
+	<EXP\_AND> & -, not, (, ID, INTEGER, true, false & or, $\varepsilon$ \\
+	<EXP\_AND\_LR> & and, $\varepsilon$ & or, $\varepsilon$ \\
+	<EXP\_EQUAL> & -, not, (, ID, INTEGER, true, false & and, $\varepsilon$ \\
+	<EXP\_EQUAL\_LR> & =, <, >, <=, >=, $\varepsilon$ & and, $\varepsilon$ \\
+	<EXP\_ADD> & -, not, (, ID, INTEGER, true, false & =, <, >, <=, >=, $\varepsilon$ \\
+	<EXP\_ADD\_LR> & +, -, $\varepsilon$ & =, <, >, <=, >=, $\varepsilon$ \\
+	<EXP\_MULT> & -, not, (, ID, INTEGER, true, false & +, -, $\varepsilon$ \\
+	<EXP\_MULT\_LR> & *, /, $\varepsilon$ & +, -, $\varepsilon$ \\
+	<EXP\_NOT> & -, not, (, ID, INTEGER, true, false & *, /, $\varepsilon$ \\
+	<EXP\_PARENTHESIS> & (, ID, INTEGER, true, false & *, /, $\varepsilon$ \\
+	<EXP\_TERM> & ID, INTEGER, true, false & *, /, $\varepsilon$ \\
+	<IF> & if & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
+	<IF\_END> & else, end-if & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
+	<CALL> & perform & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
+	<CALL\_TAIL> & until, . & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
+	<READ> & accept & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
+	<WRITE> & display & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
+	<WRITE\_TAIL> & STRING, -, not, (, ID, INTEGER, true, false & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
 
 \end{longtable}
+
+
+
 
 \end{document}
