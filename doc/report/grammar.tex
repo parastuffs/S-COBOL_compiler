@@ -155,6 +155,7 @@
 
 \end{longtable}
 
+\newpage
 \begin{longtable}{l||ccccccc}
 	& identification & ID & . & environment & data & INTEGER & value\\
 	<PROGRAM> & 1 & & & & & & \\
@@ -198,6 +199,7 @@
 	<WRITE\_TAIL> & & 73 & & & & 73 & \\
 \end{longtable}
 
+\newpage
 \begin{longtable}{l||ccccccc}
 	& procedure & move & compute & add & substract & multiply & divide \\
 	<PROGRAM> & & & & & & & \\
@@ -242,7 +244,7 @@
 \end{longtable}
 
 
-
+\newpage
 \begin{longtable}{l||ccccccccc}
 	& perform & accept & display & stop & - & not & ( & true & false\\
 	<PROGRAM> & & & & & & & & & \\
@@ -286,8 +288,94 @@
 	<WRITE\_TAIL> & & & & & 73 & 73 & 73 & 73 & 73 \\
 \end{longtable}
 
-%or & and & = & < & > & <= & >= & * & / & if & else & end-if & until & STRING & , & to & from & giving & ) & then & +
+\newpage
+\begin{longtable}{l||cccccccccccccc}
+	& or & and & = & < & > & <= & >= & * & / & if & else & end-if & + & until\\
+	<PROGRAM> & & & & & & & & & & & & & & \\
+	<IDENT> & & & & & & & & & & & & & & \\
+	<WORDS>  & & & & & & & & & & & & & & \\
+	<WORDS\_LR>  & & & & & & & & & & & & & & \\
+	<END\_INST> & & & & & & & & & & & & & & \\
+	<ENV> & & & & & & & & & & & & & & \\
+	<DATA>  & & & & & & & & & & & & & & \\
+	<VAR\_LIST> & & & & & & & & & & & & & & \\
+	<VAR\_DECL>  & & & & & & & & & & & & & & \\
+	<VAR\_DECL\_TAIL> & & & & & & & & & & & & & & \\
+	<LEVEL> & & & & & & & & & & & & & & \\
+	<PROC> & & & & & & & & & & & & & & \\
+	<LABELS> & & & & & & & & & & & & & & \\
+	<LABELS\_LR>  & & & & & & & & & & & & & & \\
+	<LABEL>  & & & & & & & & & & & & & & \\
+	<INSTRUCTION\_LIST> & & & & & & & & & 20 & & & & & \\
+	<INSTRUCTION> & & & & & & & & & 23 & & & & & \\
+	<ASSIGNATION> & & & & & & & & & & & & & & \\
+	<ASSIGN\_END> & & & & & & & & & & & & & & \\
+	<EXPRESSION>  & & & & & & & & & & & & & & \\
+	<EXPRESSION\_LR> & 36 & & & & & & & & & & & & & \\
+	<EXP\_AND>  & & & & & & & & & & & & &  &\\
+	<EXP\_AND\_LR> & 40 & 39 & & & & & & & & & & & & \\
+	<EXP\_EQUAL>  & & & & & & & & & & & & & & \\
+	<EXP\_EQUAL\_LR> & & 47 & 42 & 43 & 44 & 45 & 46 & & & & & & & \\
+	<EXP\_ADD>  & & & & & & & & & & & & & \\
+	<EXP\_ADD\_LR> & & & 51 & 51 & 51 & 51 & 51 & & & & & & 49 & \\
+	<EXP\_MULT>  & & & & & & & & & & & & & & \\
+	<EXP\_MULT\_LR> & & & & & & & & 53 & 54 & & & & 55 & \\
+	<EXP\_NOT>  & & & & & & & & & & & & & & \\
+	<EXP\_PARENTHESIS>  & & & & & & & & & & & & & & \\
+	<EXP\_TERM>  & & & & & & & & & & & & & & \\
+	<IF>  & & & & & & & & & & 65 & & & & \\
+	<IF\_END>  & & & & & & & & & & & 66 & 67 & & \\
+	<CALL>  & & & & & & & & & & & & & & \\
+	<CALL\_TAIL> & & & & & & & & & & & & & & 69 \\
+	<READ>  & & & & & & & & & & & & & & \\
+	<WRITE> & & & & & & & & & & & & & & \\
+	<WRITE\_TAIL>  & & & & & & & & & & & & & & \\
+\end{longtable}
 
+
+\newpage
+\begin{longtable}{l||cccccccc}
+	& until & STRING & , & to & from & giving & ) & then \\
+	<PROGRAM> & & & & & & & & \\
+	<IDENT> & & & & & & & & \\
+	<WORDS>  & & & & & & & & \\
+	<WORDS\_LR>  & & & & & & & & \\
+	<END\_INST> & & & & & & & & \\
+	<ENV> & & & & & & & & \\
+	<DATA>  & & & & & & & & \\
+	<VAR\_LIST> & & & & & & & & \\
+	<VAR\_DECL>  & & & & & & & & \\
+	<VAR\_DECL\_TAIL> & & & & & & & & \\
+	<LEVEL> & & & & & & & & \\
+	<PROC> & & & & & & & & \\
+	<LABELS> & & & & & & & & \\
+	<LABELS\_LR>  & & & & & & & & \\
+	<LABEL>  & & & & & & & & \\
+	<INSTRUCTION\_LIST> & & & & & & & & \\
+	<INSTRUCTION> & & & & & & & & \\
+	<ASSIGNATION> & & & & & & & & \\
+	<ASSIGN\_END> & & & & & & & & \\
+	<EXPRESSION>  & & & & & & & & \\
+	<EXPRESSION\_LR> & & & 37 & 37 & 37 & 37 & 37 & 37 \\
+	<EXP\_AND>  & & & & & & & & \\
+	<EXP\_AND\_LR> & & & & & & & & \\
+	<EXP\_EQUAL>  & & & & & & & & \\
+	<EXP\_EQUAL\_LR> & & & & & & & & \\
+	<EXP\_ADD>  & & & & & & & & \\
+	<EXP\_ADD\_LR> & & & & & & & & \\
+	<EXP\_MULT>  & & & & & & & & \\
+	<EXP\_MULT\_LR> & & & & & & & & \\
+	<EXP\_NOT>  & & & & & & & & \\
+	<EXP\_PARENTHESIS>  & & & & & & & & \\
+	<EXP\_TERM>  & & & & & & & & \\
+	<IF>  & & & & & & & & \\
+	<IF\_END>  & & & & & & & & \\
+	<CALL>  & & & & & & & & \\
+	<CALL\_TAIL> & 69 & & & & & & & \\
+	<READ>  & & & & & & & & \\
+	<WRITE> & & & & & & & & \\
+	<WRITE\_TAIL> & & 74 & & & & & & \\
+\end{longtable}
 
 %	<PROGRAM>
 %	<IDENT>
