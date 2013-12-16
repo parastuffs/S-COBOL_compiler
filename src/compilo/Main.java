@@ -1,3 +1,4 @@
+package compilo;
 import java.util.Scanner;
 
 /**
@@ -12,12 +13,10 @@ import java.util.Scanner;
  */
 public class Main {
 
-	//TODO support tab at the beginning of the line and at the end too.
 	//TODO should not reject (9). -> operation, not image
 	//TODO variables field empty
 	//TODO ne pas confondre label et variable
 	//-> label = reference de declaration
-	//+0.5 éventuel.
 	//TODO report : definir les symboles utilises
 	//TODO introduction et conclusion.
 	
@@ -52,6 +51,7 @@ public class Main {
 		str = sc.nextLine();
 		while (!str.isEmpty()){
 			str = str+"\n";
+			str = str.replaceAll("\t", "");
 			String[] lexCouple={"",""};
 			newString = true;
 			lexCouple[1] = "";
