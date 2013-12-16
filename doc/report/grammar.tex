@@ -23,6 +23,7 @@
 \usepackage{verbatim}
 \usepackage{longtable}
 \usepackage{array}
+\usepackage{rotating}
 
 \newcounter{rule}
 \newcommand{\addRule}[2]{%
@@ -154,7 +155,178 @@
 
 \end{longtable}
 
+\begin{longtable}{l||ccccccc}
+	& identification & ID & . & environment & data & INTEGER & value\\
+	<PROGRAM> & 1 & & & & & & \\
+	<IDENT> & 2 & & & & & & \\
+	<WORDS> &  & 3 & & & & & \\
+	<WORDS\_LR> & & 4 & 5 & & & & \\
+	<END\_INST> & & & 6 & & & & \\
+	<ENV> & & & & 7 & & & \\
+	<DATA> & & & & & 8 & & \\
+	<VAR\_LIST> & & & & & 9 & & 10 \\
+	<VAR\_DECL> & & & & & 11 & & \\
+	<VAR\_DECL\_TAIL> & & & 13 & & & & 12 \\
+	<LEVEL> & & & & & & 14 & \\
+	<PROC> & & & & & & & \\
+	<LABELS> & & 16 & & & & & \\
+	<LABELS\_LR> & & 17 & & & & & \\
+	<LABEL> & & 19 & & & & & \\
+	<INSTRUCTION\_LIST> & & 21 & & & & & \\
+	<INSTRUCTION> & & & & & & & \\
+	<ASSIGNATION> & & & & & & & \\
+	<ASSIGN\_END> & & 34 & & & & 34 & \\
+	<EXPRESSION> & & 35 & & & & 35 & \\
+	<EXPRESSION\_LR> & & & 37 & & & & \\
+	<EXP\_AND> & & 38 & & & & 38 & \\
+	<EXP\_AND\_LR> & & & & & & & \\
+	<EXP\_EQUAL> & & 41 & & & & 41 & \\
+	<EXP\_EQUAL\_LR> & & & & & & & \\
+	<EXP\_ADD> & & 48 & & & & 48 & \\
+	<EXP\_ADD\_LR> & & & & & & & \\
+	<EXP\_MULT> & & 52 & & & & 52 & \\
+	<EXP\_MULT\_LR> & & & & & & & \\
+	<EXP\_NOT> & & 56 & & & & 56 & \\
+	<EXP\_PARENTHESIS> & & 59 & & & & 59 & \\
+	<EXP\_TERM> & & 61 & & & & 62 & \\
+	<IF> & & & & & & & \\
+	<IF\_END> & & & & & & & \\
+	<CALL> & & & & & & & \\
+	<CALL\_TAIL> & & & & & & & \\
+	<READ> & & & & & & & \\
+	<WRITE> & & & & & & & \\
+	<WRITE\_TAIL> & & 73 & & & & 73 & \\
+\end{longtable}
+
+\begin{longtable}{l||ccccccc}
+	& procedure & move & compute & add & substract & multiply & divide \\
+	<PROGRAM> & & & & & & & \\
+	<IDENT> & & & & & & & \\
+	<WORDS> & & & & & & & \\
+	<WORDS\_LR> & & & & & & & \\
+	<END\_INST> & & & & & & & \\
+	<ENV> & & & & & & & \\
+	<DATA> & & & & & & & \\
+	<VAR\_LIST> & 10 & & & & & & \\
+	<VAR\_DECL> & & & & & & & \\
+	<VAR\_DECL\_TAIL> & & & & & & & \\
+	<LEVEL> & & & & & & & \\
+	<PROC> & 15 & & & & & & \\
+	<LABELS> & & & & & & & \\
+	<LABELS\_LR> & & & & & & & \\
+	<LABEL> & & & & & & & \\
+	<INSTRUCTION\_LIST> & & 20 & 20 & 20 & 20 & 20 & 20 \\
+	<INSTRUCTION> & & 22 & 22 & 22 & 22 & 22 & 22 \\
+	<ASSIGNATION> & & 28 & 29 & 30 & 31 & 32 & 33 \\
+	<ASSIGN\_END> & & & & & & & \\
+	<EXPRESSION> & & & & & & & \\
+	<EXPRESSION\_LR> & & & & & & & \\
+	<EXP\_AND> & & & & & & & \\
+	<EXP\_AND\_LR> & & & & & & & \\
+	<EXP\_EQUAL> & & & & & & & \\
+	<EXP\_EQUAL\_LR> & & & & & & & \\
+	<EXP\_ADD> & & & & & & & \\
+	<EXP\_ADD\_LR> & & & & & & & \\
+	<EXP\_MULT> & & & & & & & \\
+	<EXP\_MULT\_LR> & & & & & & & \\
+	<EXP\_NOT> & & & & & & & \\
+	<EXP\_PARENTHESIS> & & & & & & & \\
+	<EXP\_TERM> & & & & & & & \\
+	<IF> & & & & & & & \\
+	<IF\_END> & & & & & & & \\
+	<CALL> & & & & & & & \\
+	<CALL\_TAIL> & & & & & & & \\
+	<READ> & & & & & & & \\
+	<WRITE> & & & & & & & \\
+	<WRITE\_TAIL> & & & & & & & \\
+\end{longtable}
 
 
+
+\begin{longtable}{l||ccccccccc}
+	& perform & accept & display & stop & - & not & ( & true & false\\
+	<PROGRAM> & & & & & & & & & \\
+	<IDENT>& & & & & & & & & \\
+	<WORDS> & & & & & & & & & \\
+	<WORDS\_LR> & & & & & & & & & \\
+	<END\_INST>& & & & & & & & & \\
+	<ENV>& & & & & & & & & \\
+	<DATA> & & & & & & & & & \\
+	<VAR\_LIST>& & & & & & & & & \\
+	<VAR\_DECL> & & & & & & & & & \\
+	<VAR\_DECL\_TAIL>& & & & & & & & & \\
+	<LEVEL>& & & & & & & & & \\
+	<PROC>& & & & & & & & & \\
+	<LABELS>& & & & & & & & & \\
+	<LABELS\_LR> & & & & & & & & & \\
+	<LABEL> & & & & & & & & & \\
+	<INSTRUCTION\_LIST>& 20 & 20 & 20 & 20 & & & & & \\
+	<INSTRUCTION>& 24 & 25 & 26 & 27 & & & & & \\
+	<ASSIGNATION>& & & & & & & & & \\
+	<ASSIGN\_END>& & & & & 34 & 34 & 34 & 34 & 34 \\
+	<EXPRESSION> & & & & & 35 & 35 & 35 & 35 & 35 \\
+	<EXPRESSION\_LR>& & & & & & & & & \\
+	<EXP\_AND> & & & & & 38 & 38 & 38 & 38 & 38 \\
+	<EXP\_AND\_LR>& & & & & & & & & \\
+	<EXP\_EQUAL> & & & & & 41 & 41 & 41 & 41 & 41 \\
+	<EXP\_EQUAL\_LR>& & & & & & & & & \\
+	<EXP\_ADD> & & & & & 48 & 48 & 48 & 48 & 48 \\
+	<EXP\_ADD\_LR>& & & & & 50 & & & & \\
+	<EXP\_MULT> & & & & & 52 & 52 & 52 & 52 & 52 \\
+	<EXP\_MULT\_LR>& & & & & 55 & & & & \\
+	<EXP\_NOT> & & & & & 56 & 57 & 58 & 58 & 58 \\
+	<EXP\_PARENTHESIS> & & & & & & & 59 & 60 & 60 \\
+	<EXP\_TERM> & & & & & & & & 63 & 64 \\
+	<IF> & & & & & & & & & \\
+	<IF\_END> & & & & & & & & & \\
+	<CALL> & 68 & & & & & & & & \\
+	<CALL\_TAIL>& & & & & & & & & \\
+	<READ> & & 71 & & & & & & & \\
+	<WRITE>& & & 72 & & & & & & \\
+	<WRITE\_TAIL> & & & & & 73 & 73 & 73 & 73 & 73 \\
+\end{longtable}
+
+%or & and & = & < & > & <= & >= & * & / & if & else & end-if & until & STRING & , & to & from & giving & ) & then & +
+
+
+%	<PROGRAM>
+%	<IDENT>
+%	<WORDS> 
+%	<WORDS\_LR> 
+%	<END\_INST>
+%	<ENV>
+%	<DATA> 
+%	<VAR\_LIST>
+%	<VAR\_DECL> 
+%	<VAR\_DECL\_TAIL>
+%	<LEVEL>
+%	<PROC>
+%	<LABELS>
+%	<LABELS\_LR> 
+%	<LABEL> 
+%	<INSTRUCTION\_LIST>
+%	<INSTRUCTION>
+%	<ASSIGNATION>
+%	<ASSIGN\_END>
+%	<EXPRESSION> 
+%	<EXPRESSION\_LR>
+%	<EXP\_AND> 
+%	<EXP\_AND\_LR>
+%	<EXP\_EQUAL> 
+%	<EXP\_EQUAL\_LR>
+%	<EXP\_ADD> 
+%	<EXP\_ADD\_LR>
+%	<EXP\_MULT> 
+%	<EXP\_MULT\_LR>
+%	<EXP\_NOT> 
+%	<EXP\_PARENTHESIS> 
+%	<EXP\_TERM> 
+%	<IF> 
+%	<IF\_END> 
+%	<CALL> 
+%	<CALL\_TAIL>
+%	<READ> 
+%	<WRITE>
+%	<WRITE\_TAIL> 
 
 \end{document}
