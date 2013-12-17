@@ -186,6 +186,7 @@ public class LexicalAnalyzer {
 		
 		else {
 			String sub[] = input.split(" ");
+			for(int i=0;i<sub.length;i++) System.out.println(">"+sub[i]+"<");
 			boolean found = false;
 			for(int i=0;i<sub.length && !found;i++) {
 				couple[0] = "";
@@ -199,18 +200,19 @@ public class LexicalAnalyzer {
 				
 				//The identifier may end with a dot or dot+\n:
 				if(couple[0].matches(".+\\.$") || couple[0].matches(".+\\.\\n$")) {
+				//if(couple[0].matches(".+\\.") || couple[0].matches(".+\\.\\n.*$")) {
 					//Beware, lastIndexOf(".") because there may be a decimal number.
 					couple[0] = couple[0].substring(0, couple[0].lastIndexOf("."));
 				}
 				//Dot + \n -> end_of_instruction
-				if(input.matches("^\\.\n$")) {
+				if(couple[0].matches("^\\.\n$")) {
 					found=true;
 					couple[0] = couple[0].replaceAll("\n$", "\\\\n");
 					couple[1] = "END_OF_INSTRUCTION";
 					this.variable[0] = null;
 					this.label[0] = null;
 				}
-				else if((n=this.keywords.indexOf(couple[0])) > 0) {
+				else if((n=this.keywords.indexOf(couple[0])) >= 0) {
 					couple[1] = this.units.get(n);
 					found = true;
 					this.variable[0] = null;

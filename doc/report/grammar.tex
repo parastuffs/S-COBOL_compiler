@@ -34,12 +34,12 @@
 
 \begin{longtable}{lll>{\raggedright}p{10cm}}
 	\addRule{<PROGRAM>}{<IDENT><ENV><DATA><PROC>}
-	\addRule{<IDENT>}{identification division <END\_INST> program-id. ID<END\_INST> author. WORDS<END\_INST> date-written. WORDS <END\_INST>}
+	\addRule{<IDENT>}{identification division <END\_INST> program-id. ID<END\_INST> author. <WORDS><END\_INST> date-written. <WORDS><END\_INST>}
 	\addRule{<WORDS>}{ID <WORDS\_LR>}
 	\addRule{<WORDS\_LR>}{ID <WORDS\_LR>}
 	\addRule{}{$\varepsilon$}
 	\addRule{<END\_INST>}{.\textbackslash n}
-	\addRule{<ENV>}{environment division<END\_INST> configuration section<END\_INST> source-computer. WORDS<END\_INST> object-computer. WORDS<END\_INST>
+	\addRule{<ENV>}{environment division<END\_INST> configuration section<END\_INST> source-computer. <WORDS><END\_INST> object-computer. <WORDS><END\_INST>
 	}
 	\addRule{<DATA>}{data division<END\_INST> working-storage section<END\_INST> <VAR\_LIST>}
 	\addRule{<VAR\_LIST>}{<VAR\_DECL> <VAR\_LIST>}

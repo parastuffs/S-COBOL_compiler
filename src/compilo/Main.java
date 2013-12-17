@@ -1,4 +1,10 @@
 package compilo;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Scanner;
 
 /**
@@ -14,7 +20,7 @@ import java.util.Scanner;
 public class Main {
 
 	//TODO should not reject (9). -> operation, not image
-	//TODO variables field empty
+	//TODO? variables field empty
 	//TODO ne pas confondre label et variable
 	//-> label = reference de declaration
 	//TODO report : definir les symboles utilises
@@ -42,40 +48,66 @@ public class Main {
 	public static void main(String[] args) {
 	
 		LexicalAnalyzer lex = new LexicalAnalyzer();
+		Parser parser = new Parser(lex);
 		
-		Scanner sc = new Scanner(System.in);
-		String str;
-		boolean newString;
-		int lineNum = 1;
-		System.out.println(">Please enter a line of S-COBOL code:");
-		str = sc.nextLine();
-		while (!str.isEmpty()){
-			str = str+"\n";
-			str = str.replaceAll("\t", "");
-			String[] lexCouple={"",""};
-			newString = true;
-			lexCouple[1] = "";
-			while(!str.isEmpty() && lexCouple[1]!="ERROR") {
-				lexCouple = lex.nextToken(str,newString,lineNum);
-				lexCouple[0] = espaceChar(lexCouple[0]);
-				str = str.replaceFirst(lexCouple[0], "");
-				str = str.replaceFirst("^\\ ", "");
-				lexCouple[0] = unEscpaceChar(lexCouple[0]);
-				if(lexCouple[1]=="ERROR") {
-					System.out.println("The line was rejected.");
-				}
-				else {
-					System.out.println("token: '"+lexCouple[0]+"'	lexical unit: '"
-							+lexCouple[1]+"'");
-				}
-				newString = false;
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					new DataInputStream(new FileInputStream("cobol-source-file.cbl"))));
+			String input = "";
+			String line;
+			while((line = br.readLine()) != null) {
+				input += line + "\n";
+				//if(line.matches("^.*(division).*\n$")) System.out.println("READY");
+				//if(input.matches("^[.\n]*
 			}
-			lineNum++;
-			System.out.println(">Please enter a line of S-COBOL code:");
-			str = sc.nextLine();
+			input += "#";
+			input = input.replaceAll("\t", "");
+			System.out.println(input);
+			//if(input.matches("^[.\n]*BNC$")) System.out.println("READY");
+			
+			parser.parse(input);
+			
+			br.close();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
-		lex.printSymbolsTable();
+//		Scanner sc = new Scanner(System.in);
+//		String str;
+//		boolean newString;
+//		int lineNum = 1;
+//		System.out.println(">Please enter a line of S-COBOL code:");
+//		str = sc.nextLine();
+//		while (!str.isEmpty()){
+//			str = str+"\n";
+//			str = str.replaceAll("\t", "");
+//			String[] lexCouple={"",""};
+//			newString = true;
+//			lexCouple[1] = "";
+//			while(!str.isEmpty() && lexCouple[1]!="ERROR") {
+//				lexCouple = lex.nextToken(str,newString,lineNum);
+//				lexCouple[0] = escapeChar(lexCouple[0]);//Escaping for the regex
+//				str = str.replaceFirst(lexCouple[0], "");
+//				str = str.replaceFirst("^\\ ", "");//Space strip
+//				lexCouple[0] = unEscpaceChar(lexCouple[0]);
+//				if(lexCouple[1]=="ERROR") {
+//					System.out.println("The line was rejected.");
+//				}
+//				else {
+//					System.out.println("token: '"+lexCouple[0]+"'	lexical unit: '"
+//							+lexCouple[1]+"'");
+//				}
+//				newString = false;
+//			}
+//			lineNum++;
+//			System.out.println(">Please enter a line of S-COBOL code:");
+//			str = sc.nextLine();
+//		}
+//		
+//		lex.printSymbolsTable();
 	}
 
 	/**
@@ -104,7 +136,7 @@ public class Main {
 	 * 				String containing the characters to escape.
 	 * @return The escaped String.
 	 */
-	private static String espaceChar(String input) {
+	private static String escapeChar(String input) {
 		input = input.replaceAll("\\(", "[(]");
 		input = input.replaceAll("\\)", "[)]");
 		input = input.replaceAll("\\*", "[*]");
