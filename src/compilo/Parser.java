@@ -5,7 +5,6 @@ import java.util.Stack;
 public class Parser {
 
 	private LexicalAnalyzer lex;
-	private Stack<String> stack;
 	private String input;
 	private String token, terminal;
 	private int lineNum;
@@ -15,7 +14,6 @@ public class Parser {
 	
 	public Parser(LexicalAnalyzer l) {
 		this.lex = l;
-		this.stack = new Stack<String>();
 		this.lineNum = 0;
 		this.newLine = true;
 	}
@@ -46,94 +44,60 @@ public class Parser {
 		program();
 	}
 	
-	public void matchNextToken() {
-		String tos = this.stack.peek();//Top os stack
-		if(tos.equals(this.token)) {
-			if("FINAL_SYMBOL".equals(this.token)) {
+	public void matchNextToken(String toMatch) {
+		if(this.token.equals(toMatch)) {
+			if("FINAL_SYMBOL".equals(toMatch)) {
 				System.out.println("ACCEPT");
 			}
-			this.stack.pop();
 			this.terminal = escapeChar(this.terminal);
 			this.input = this.input.replaceFirst(this.terminal, "");
 			//System.out.println("Match successful of '"+this.token+"'");
 		}
 		else {
-			System.err.println("Error trying to match tos='"+tos+"' with '"+this.token+
+			System.err.println("Error trying to match tos='"+toMatch+"' with '"+this.token+
 					"' (which is '"+this.terminal+"')");
 		}
 		nextToken();
 	}
 	
 	public void program() {
-		this.stack.push("FINAL_SYMBOL");
-		this.stack.push("PROC");
-		this.stack.push("DATA");
-		this.stack.push("ENV");
-		this.stack.push("IDENT");
 		ident();
 		env();
 		data();
 		proc();
-		matchNextToken();//Match the final Symbol
+		matchNextToken("FINAL_SYMBOL");//Match the final Symbol
 	}
 	
-	public void ident() {
-		this.stack.pop();//Pops the previous variable from which we came from.
-		this.stack.push("END_INST");
-		this.stack.push("WORDS");
-		this.stack.push("DOT_KEYWORD");
-		this.stack.push("DATE_WRITTEN_KEYWORD");
-		this.stack.push("END_INST");
-		this.stack.push("WORDS");
-		this.stack.push("DOT_KEYWORD");
-		this.stack.push("AUTHOR_KEYWORD");
-		this.stack.push("END_INST");
-		this.stack.push("IDENTIFIER");
-		this.stack.push("DOT_KEYWORD");
-		this.stack.push("PROGRAM-ID_KEYWORD");
-		this.stack.push("END_INST");
-		this.stack.push("DIVISION_KEYWORD");
-		this.stack.push("IDENTIFICATION_KEYWORD");
-		
-		matchNextToken();//identification
-		matchNextToken();//division
+	public void ident() {		
+		matchNextToken("IDENTIFICATION_KEYWORD");//identification
+		matchNextToken("DIVISION_KEYWORD");//division
 		endInst();
-		matchNextToken();//program-id
-		matchNextToken();//dot
-		matchNextToken();//IDENTIFIER
+		matchNextToken("PROGRAM-ID_KEYWORD");//program-id
+		matchNextToken("DOT_KEYWORD");//dot
+		matchNextToken("IDENTIFIER");//IDENTIFIER
 		endInst();
-		matchNextToken();//author
-		matchNextToken();//dot
+		matchNextToken("AUTHOR_KEYWORD");//author
+		matchNextToken("DOT_KEYWORD");//dot
 		words();
 		endInst();
-		matchNextToken();//date-written
-		matchNextToken();//dot
+		matchNextToken("DATE_WRITTEN_KEYWORD");//date-written
+		matchNextToken("DOT_KEYWORD");//dot
 		words();
 		endInst();
-		
-		
-		
 	}
 	
 	public void endInst() {
-		this.stack.pop();
-		this.stack.push("END_OF_INSTRUCTION");
 		this.newLine = true;//We just ended a line, thus begining a new one.
-		matchNextToken();
+		matchNextToken("END_OF_INSTRUCTION");
 	}
 	
 	public void words() {
-		this.stack.pop();
 		if("IDENTIFIER".equals(this.token)) {
-			this.stack.push("WORDS_LR");
-			this.stack.push("IDENTIFIER");
-			matchNextToken();//IDENTIFIER
+			matchNextToken("IDENTIFIER");//IDENTIFIER
 			wordsLR();
 		}
 		else if("INTEGER".equals(this.token)) {
-			this.stack.push("WORDS_LR");
-			this.stack.push("INTEGER");
-			matchNextToken();//INTEGER
+			matchNextToken("INTEGER");//INTEGER
 			wordsLR();
 		}
 		
@@ -142,17 +106,12 @@ public class Parser {
 	}
 	
 	public void wordsLR() {
-		this.stack.pop();
 		if("IDENTIFIER".equals(this.token)) {
-			this.stack.push("WORDS_LR");
-			this.stack.push("IDENTIFIER");
-			matchNextToken();//IDENTIFIER
+			matchNextToken("IDENTIFIER");//IDENTIFIER
 			wordsLR();
 		}
 		else if("INTEGER".equals(this.token)) {
-			this.stack.push("WORDS_LR");
-			this.stack.push("INTEGER");
-			matchNextToken();//INTEGER
+			matchNextToken("INTEGER");//INTEGER
 			wordsLR();
 		}
 		else if("DOT_KEYWORD".equals(this.token)) {
@@ -162,16 +121,13 @@ public class Parser {
 	}
 	
 	public void env() {
-		this.stack.pop();
 	}
 	
 	public void data() {
-		this.stack.pop();
 		
 	}
 	
 	public void proc() {
-		this.stack.pop();
 		
 	}
 	
