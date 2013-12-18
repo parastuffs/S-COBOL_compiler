@@ -21,7 +21,7 @@ public class Parser {
 	/**
 	 * Determine the next token on the input using the lexical analyzer.
 	 */
-	public void nextToken() {
+	private void nextToken() {
 		String[] lexCouple = {"", ""};
 		this.input = this.input.replaceAll("^\\ *", "");//Removes all the preceding white spaces.
 		if(this.newLine) {
@@ -44,7 +44,7 @@ public class Parser {
 		program();
 	}
 	
-	public void matchNextToken(String toMatch) {
+	private void matchNextToken(String toMatch) {
 		if(this.token.equals(toMatch)) {
 			if("FINAL_SYMBOL".equals(toMatch)) {
 				System.out.println("ACCEPT");
@@ -60,7 +60,7 @@ public class Parser {
 		nextToken();
 	}
 	
-	public void program() {
+	private void program() {
 		ident();
 		env();
 		data();
@@ -68,7 +68,7 @@ public class Parser {
 		matchNextToken("FINAL_SYMBOL");//Match the final Symbol
 	}
 	
-	public void ident() {		
+	private void ident() {		
 		matchNextToken("IDENTIFICATION_KEYWORD");//identification
 		matchNextToken("DIVISION_KEYWORD");//division
 		endInst();
@@ -86,12 +86,12 @@ public class Parser {
 		endInst();
 	}
 	
-	public void endInst() {
+	private void endInst() {
 		this.newLine = true;//We just ended a line, thus begining a new one.
 		matchNextToken("END_OF_INSTRUCTION");
 	}
 	
-	public void words() {
+	private void words() {
 		if("IDENTIFIER".equals(this.token)) {
 			matchNextToken("IDENTIFIER");//IDENTIFIER
 			wordsLR();
@@ -105,7 +105,7 @@ public class Parser {
 		
 	}
 	
-	public void wordsLR() {
+	private void wordsLR() {
 		if("IDENTIFIER".equals(this.token)) {
 			matchNextToken("IDENTIFIER");//IDENTIFIER
 			wordsLR();
@@ -120,14 +120,28 @@ public class Parser {
 		
 	}
 	
-	public void env() {
+	private void env() {
+		matchNextToken("ENVIRONMENT_KEYWORD");
+		matchNextToken("DIVISION_KEYWORD");
+		endInst();
+		matchNextToken("CONFIGURATION_KEYWORD");
+		matchNextToken("SECTION_KEYWORD");
+		endInst();
+		matchNextToken("SOURCE-COMPUTER_KEYWORD");
+		matchNextToken("DOT_KEYWORD");
+		words();
+		endInst();
+		matchNextToken("OBJECT-COMPUTER_KEYWORD");
+		matchNextToken("DOT_KEYWORD");
+		words();
+		endInst();		
 	}
 	
-	public void data() {
+	private void data() {
 		
 	}
 	
-	public void proc() {
+	private void proc() {
 		
 	}
 	
