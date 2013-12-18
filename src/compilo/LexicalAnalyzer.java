@@ -46,6 +46,12 @@ public class LexicalAnalyzer {
 	 */
 	private SymbolsTable symTab;
 	
+	/**Boolean telling whether the token as been found or not.*/
+	private boolean found;
+	
+	/**Current line number*/
+	private int lineNum;
+	
 	/**
 	 * <b>Constructor</b>
 	 * <p>Initializes the keywords and lexical units ArrayLists.
@@ -176,7 +182,7 @@ public class LexicalAnalyzer {
 	 */
 	public String[] nextToken(String input, boolean newLine, int lineNum) {
 		String[] couple = {"",""};
-		int n;
+		this.lineNum = lineNum;
 		
 		//Comment line
 		if(isComment(input,newLine)) {
@@ -185,9 +191,9 @@ public class LexicalAnalyzer {
 		}
 		
 		else {
-			String sub[] = input.split(" ");
+			String sub[] = input.split(" ");//Split at the spaces
 			for(int i=0;i<sub.length;i++) System.out.println(">"+sub[i]+"<");
-			boolean found = false;
+			this.found = false;
 			for(int i=0;i<sub.length && !found;i++) {
 				couple[0] = "";
 				//Successive concatenation
@@ -198,70 +204,81 @@ public class LexicalAnalyzer {
 					}
 				}
 				
-				//The identifier may end with a dot or dot+\n:
-				if(couple[0].matches(".+\\.$") || couple[0].matches(".+\\.\\n$")) {
-				//if(couple[0].matches(".+\\.") || couple[0].matches(".+\\.\\n.*$")) {
-					//Beware, lastIndexOf(".") because there may be a decimal number.
-					couple[0] = couple[0].substring(0, couple[0].lastIndexOf("."));
-				}
-				//Dot + \n -> end_of_instruction
-				if(couple[0].matches("^\\.\n$")) {
-					found=true;
-					couple[0] = couple[0].replaceAll("\n$", "\\\\n");
-					couple[1] = "END_OF_INSTRUCTION";
-					this.variable[0] = null;
-					this.label[0] = null;
-				}
-				else if((n=this.keywords.indexOf(couple[0])) >= 0) {
-					couple[1] = this.units.get(n);
-					found = true;
-					this.variable[0] = null;
-					this.label[0] = null;
-				}
-				else if(isString(couple[0])) {
-					found = true;
-					couple[1] = "STRING";
-					this.variable[0] = null;
-					this.label[0] = null;
-				}
-				else if(isInteger(couple[0])) {
-					found = true;
-					couple[1] = "INTEGER";
-					this.variable[0] = null;
-					this.label[0] = null;
-				}
-				else if(isReal(couple[0])) {
-					found = true;
-					couple[1] = "REAL";
-					this.variable[0] = null;
-					this.label[0] = null;
-				}
-				else if(isImage(couple[0])) {
-					if(this.variable[0]!=null) {
-						this.variable[1] = couple[0];
-						this.symTab.addVariable(this.variable);
-					}
-					found = true;
-					couple[1] = "IMAGE";
-					this.variable[0] = null;
-					this.label[0] = null;
-				}
-				else if(isIdentifier(couple[0])) {
-					this.variable[0] = couple[0];
-					this.label[0] = couple[0];
-					this.label[1] = Integer.toString(lineNum);
-					this.symTab.addLabel(this.label);
-					found = true;
-					couple[1] = "IDENTIFIER";
-				}
-				else {
-					couple[1] = "ERROR";//ERROR state
-				}
+				couple = searchTokenType(couple);
+				
 				
 			}
 		}
 		return couple;
 	}
+	
+	private String[] searchTokenType(String[] couple) {
+		int n;
+		
+		//The identifier may end with a dot or dot+\n:
+		if(couple[0].matches(".+\\.$") || couple[0].matches(".+\\.\\n$")) {
+		//if(couple[0].matches(".+\\.") || couple[0].matches(".+\\.\\n.*$")) {
+			//Beware, lastIndexOf(".") because there may be a decimal number.
+			couple[0] = couple[0].substring(0, couple[0].lastIndexOf("."));
+		}
+		//Dot + \n -> end_of_instruction
+		if(couple[0].matches("^\\.\n$")) {
+			this.found=true;
+			couple[0] = couple[0].replaceAll("\n$", "\\\\n");
+			couple[1] = "END_OF_INSTRUCTION";
+			this.variable[0] = null;
+			this.label[0] = null;
+		}
+		else if((n=this.keywords.indexOf(couple[0])) >= 0) {
+			couple[1] = this.units.get(n);
+			this.found = true;
+			this.variable[0] = null;
+			this.label[0] = null;
+		}
+		else if(isString(couple[0])) {
+			this.found = true;
+			couple[1] = "STRING";
+			this.variable[0] = null;
+			this.label[0] = null;
+		}
+		else if(isInteger(couple[0])) {
+			this.found = true;
+			couple[1] = "INTEGER";
+			this.variable[0] = null;
+			this.label[0] = null;
+		}
+		else if(isReal(couple[0])) {
+			this.found = true;
+			couple[1] = "REAL";
+			this.variable[0] = null;
+			this.label[0] = null;
+		}
+		else if(isImage(couple[0])) {
+			if(this.variable[0]!=null) {
+				this.variable[1] = couple[0];
+				this.symTab.addVariable(this.variable);
+			}
+			this.found = true;
+			couple[1] = "IMAGE";
+			this.variable[0] = null;
+			this.label[0] = null;
+		}
+		else if(isIdentifier(couple[0])) {
+			this.variable[0] = couple[0];
+			this.label[0] = couple[0];
+			this.label[1] = Integer.toString(this.lineNum);
+			this.symTab.addLabel(this.label);
+			this.found = true;
+			couple[1] = "IDENTIFIER";
+		}
+		else {
+			couple[1] = "ERROR";//ERROR state
+		}
+	
+		return couple;
+	}
+	
+	
 
 	/**
 	 * <p>Ask the table of symbols to the SymbolsTable
