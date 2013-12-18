@@ -49,13 +49,13 @@ public class Parser {
 	public void matchNextToken() {
 		String tos = this.stack.peek();//Top os stack
 		if(tos.equals(this.token)) {
-			if("#".equals(this.token)) {
+			if("FINAL_SYMBOL".equals(this.token)) {
 				System.out.println("ACCEPT");
 			}
 			this.stack.pop();
 			this.terminal = escapeChar(this.terminal);
 			this.input = this.input.replaceFirst(this.terminal, "");
-			System.out.println("Match successful of '"+this.token+"'");
+			//System.out.println("Match successful of '"+this.token+"'");
 		}
 		else {
 			System.err.println("Error trying to match tos='"+tos+"' with '"+this.token+
@@ -65,6 +65,7 @@ public class Parser {
 	}
 	
 	public void program() {
+		this.stack.push("FINAL_SYMBOL");
 		this.stack.push("PROC");
 		this.stack.push("DATA");
 		this.stack.push("ENV");
@@ -73,7 +74,7 @@ public class Parser {
 		env();
 		data();
 		proc();
-		matchNextToken();
+		matchNextToken();//Match the final Symbol
 	}
 	
 	public void ident() {
@@ -129,6 +130,13 @@ public class Parser {
 			matchNextToken();//IDENTIFIER
 			wordsLR();
 		}
+		else if("INTEGER".equals(this.token)) {
+			this.stack.push("WORDS_LR");
+			this.stack.push("INTEGER");
+			matchNextToken();//INTEGER
+			wordsLR();
+		}
+		
 		//TODO PROBLEM: word (300 BNC) is first recognized as an integer.	
 		
 	}
@@ -139,6 +147,12 @@ public class Parser {
 			this.stack.push("WORDS_LR");
 			this.stack.push("IDENTIFIER");
 			matchNextToken();//IDENTIFIER
+			wordsLR();
+		}
+		else if("INTEGER".equals(this.token)) {
+			this.stack.push("WORDS_LR");
+			this.stack.push("INTEGER");
+			matchNextToken();//INTEGER
 			wordsLR();
 		}
 		else if("DOT_KEYWORD".equals(this.token)) {

@@ -65,7 +65,7 @@ public class LexicalAnalyzer {
 				"program","stop","run","move","to","compute","add","substract","multiply",
 				"divide","giving",",","(",")","-","+","=","*","/","not","true","false",
 				"<",">","<=",">=","and","or","if","else","end-if","until","accept","display",
-				"from","by"));
+				"from","by", "#"));
 
 		this.units = new ArrayList<String>( Arrays.asList("IDENTIFICATION_KEYWORD","DIVISION_KEYWORD","PROGRAM-ID_KEYWORD",
 				"AUTHOR_KEYWORD","DOT_KEYWORD","END_OF_LINE","DATE_WRITTEN_KEYWORD","ENVIRONMENT_KEYWORD",
@@ -78,7 +78,7 @@ public class LexicalAnalyzer {
 				"DIVISION_SIGN","NOT_KEYWORD","TRUE_KEYWORD","FALSE_KEYWORD","LOWER_THAN",
 				"GREATER_THAN","LOWER_OR_EQUAL","GREATER_OR_EQUAL","AND_KEYWORD","OR_KEYWORD",
 				"IF_KEYWORD","ELSE_KEYWORD","ENDI-IF_KEYWORD","UNTIL_KEYWORD","ACCEPT_KEYWORD",
-				"DISPLAY_KEYWORD","FROM_KEYWORD","BY_KEYWORD"));
+				"DISPLAY_KEYWORD","FROM_KEYWORD","BY_KEYWORD", "FINAL_SYMBOL"));
 
 		this.symTab = new SymbolsTable();
 	}
@@ -149,7 +149,7 @@ public class LexicalAnalyzer {
 		return (newLine && (input.matches("((\\*)|(/)).*\n$")));
 	}
 	
-	
+	//TODO update javadoc
 	/**
 	 * <p>Analyzes the String it is feed with.</p>
 	 * <p>It begins by checking either the input is a comment or not.
@@ -192,7 +192,7 @@ public class LexicalAnalyzer {
 		
 		else {
 			String sub[] = input.split(" ");//Split at the spaces
-			for(int i=0;i<sub.length;i++) System.out.println(">"+sub[i]+"<");
+			//for(int i=0;i<sub.length;i++) System.out.println(">"+sub[i]+"<");
 			this.found = false;
 			for(int i=0;i<sub.length && !found;i++) {
 				couple[0] = "";
@@ -208,12 +208,21 @@ public class LexicalAnalyzer {
 				
 				
 			}
+			//If the token has still not found, we have to consider
+			//another case: if the input is like 'word.somethingElse'.
+			if(!this.found) {
+				sub = input.split("\\.");//Split at the dot
+				couple[0] = sub[0];
+				searchTokenType(couple);
+			}
 		}
 		return couple;
 	}
 	
+	//TODO javadoc
 	private String[] searchTokenType(String[] couple) {
 		int n;
+		//System.out.println("String rtying to find the lexical unit of: '"+couple[0]+"'");
 		
 		//The identifier may end with a dot or dot+\n:
 		if(couple[0].matches(".+\\.$") || couple[0].matches(".+\\.\\n$")) {
@@ -222,9 +231,12 @@ public class LexicalAnalyzer {
 			couple[0] = couple[0].substring(0, couple[0].lastIndexOf("."));
 		}
 		//Dot + \n -> end_of_instruction
-		if(couple[0].matches("^\\.\n$")) {
+		if(couple[0].matches("^\\.\n.*")) {
 			this.found=true;
-			couple[0] = couple[0].replaceAll("\n$", "\\\\n");
+			//System.out.println("couple[0] before = '"+couple[0]+"'");
+			//couple[0] = couple[0].replaceAll("\n$", "\\\\n");
+			couple[0] = ".\n";
+			//System.out.println("couple[0] after = '"+couple[0]+"'");
 			couple[1] = "END_OF_INSTRUCTION";
 			this.variable[0] = null;
 			this.label[0] = null;
