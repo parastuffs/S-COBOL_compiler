@@ -75,11 +75,11 @@
 	\addRule{<EXP\_AND\_LR>}{and <EXP\_EQUAL> <EXP\_AND\_LR>}
 	\addRule{}{$\varepsilon$}
 	\addRule{<EXP\_EQUAL>}{<EXP\_ADD> <EXP\_EQUAL\_LR>}
-	\addRule{<EXP\_EQUAL\_LR>}{= <EXP\_ADD> <EXP\_EQUAL\_LR>}
-	\addRule{}{< <EXP\_ADD> <EXP\_EQUAL\_LR>}
-	\addRule{}{> <EXP\_ADD> <EXP\_EQUAL\_LR>}
-	\addRule{}{<= <EXP\_ADD> <EXP\_EQUAL\_LR>}
-	\addRule{}{>= <EXP\_ADD> <EXP\_EQUAL\_LR>}
+	\addRule{<EXP\_EQUAL\_LR>}{= <EXP\_ADD>}%TODO talk about the removal of the right recursion in the report.
+	\addRule{}{< <EXP\_ADD>}
+	\addRule{}{> <EXP\_ADD>}
+	\addRule{}{<= <EXP\_ADD>}
+	\addRule{}{>= <EXP\_ADD>}
 	\addRule{}{$\varepsilon$}
 	\addRule{<EXP\_ADD>}{<EXP\_MULT> <EXP\_ADD\_LR>}
 	\addRule{<EXP\_ADD\_LR>}{+ <EXP\_MULT> <EXP\_ADD\_LR>}
