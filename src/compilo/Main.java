@@ -60,6 +60,7 @@ public class Main {
 				//if(line.matches("^.*(division).*\n$")) System.out.println("READY");
 				//if(input.matches("^[.\n]*
 			}
+			input = input.substring(0, input.length()-1);//Removes the final '\n'
 			input += "#";
 			input = input.replaceAll("\t", "");
 			System.out.println(input);

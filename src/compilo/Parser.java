@@ -1,7 +1,5 @@
 package compilo;
 
-import java.util.Stack;
-
 public class Parser {
 
 	private LexicalAnalyzer lex;
@@ -51,7 +49,8 @@ public class Parser {
 			}
 			this.terminal = escapeChar(this.terminal);
 			this.input = this.input.replaceFirst(this.terminal, "");
-			//System.out.println("Match successful of '"+this.token+"'");
+			System.out.println("Match successful of '"+this.token+"' (terminal='"+this.terminal+"'");
+			System.out.println("Left on the input: '"+this.input+"'");
 		}
 		else {
 			System.err.println("Error trying to match tos='"+toMatch+"' with '"+this.token+
@@ -195,7 +194,347 @@ public class Parser {
 	}
 	
 	private void proc() {
-		
+		matchNextToken("PROCEDURE_KEYWORD");
+		matchNextToken("DIVISION_KEYWORD");
+		endInst();
+		matchNextToken("IDENTIFIER");
+		matchNextToken("SECTION_KEYWORD");
+		endInst();
+		labels();
+		matchNextToken("END_KEYWORD");
+		matchNextToken("PROGRAM_KEYWORD");
+		matchNextToken("IDENTIFIER");
+		matchNextToken("DOT_KEYWORD");
+	}
+	
+	private void labels() {
+		label();
+		endInst();
+		instructionList();
+		labelsLR();
+	}
+	
+	private void labelsLR() {
+		if("IDENTIFIER".equals(this.token)) {
+			label();
+			endInst();
+			instructionList();
+			labelsLR();
+		}
+		else if("END_KEYWORD".equals(this.token)) {
+			//espilon
+		}
+	}
+	
+	private void label() {
+		matchNextToken("IDENTIFIER");
+	}
+	
+	private void instructionList() {
+		if("MOVE_KEYWORD".equals(this.token) || "COMPUTE_KEYWORD".equals(this.token) ||
+				"ADD_KEYWORD".equals(this.token) || "SUBSTRACT_KEYWORD".equals(this.token) ||
+				"MULTIPLY_KEYWORD".equals(this.token) || "DIVIDE_KEYWORD".equals(this.token) ||
+				"IF_KEYWORD".equals(this.token) || "ACCEPT_KEYWORD".equals(this.token) ||
+				"DISPLAY_KEYWORD".equals(this.token) || "STOP_KEYWORD".equals(this.token) ||
+				"PERFORM_KEYWORD".equals(this.token)) {
+			instruction();
+			instructionList();
+		}
+		else if("IDENTIFIER".equals(this.token)) {
+			//epsilon
+		}
+	}
+	
+	private void instruction() {
+		if("MOVE_KEYWORD".equals(this.token) || "COMPUTE_KEYWORD".equals(this.token) ||
+				"ADD_KEYWORD".equals(this.token) || "SUBSTRACT_KEYWORD".equals(this.token) ||
+				"MULTIPLY_KEYWORD".equals(this.token) || "DIVIDE_KEYWORD".equals(this.token)) {	
+			assignation();
+		}
+		else if("IF_KEYWORD".equals(this.token)) {
+			ifRule();
+		}
+		else if("PERFORM_KEYWORD".equals(this.token)) {
+			call();
+		}
+		else if("ACCEPT_KEYWORD".equals(this.token)) {
+			read();
+		}
+		else if("DISPLAY_KEYWORD".equals(this.token)) {
+			write();
+		}
+		else if("STOP_KEYWORD".equals(this.token)) {
+			matchNextToken("STOP_KEYWORD");
+			matchNextToken("RUN_KEYWORD");
+			endInst();
+		}
+	}
+	
+	private void assignation() {
+		if("MOVE_KEYWORD".equals(this.token)) {
+			matchNextToken("MOVE_KEYWORD");
+			expression();
+			matchNextToken("TO_KEYWORD");
+			matchNextToken("IDENTIFIER");
+			endInst();
+		}
+		else if("COMPUTE_KEYWORD".equals(this.token)) {
+			matchNextToken("COMPUTE_KEYWORD");
+			matchNextToken("IDENTIFIER");
+			matchNextToken("EQUALS_SIGN");
+			expression();
+			endInst();
+		}
+		else if("ADD_KEYWORD".equals(this.token)) {
+			matchNextToken("ADD_KEYWORD");
+			expression();
+			matchNextToken("TO_KEYWORD");
+			matchNextToken("IDENTIFIER");
+			endInst();
+		}
+		else if("SUBSTRACT_KEYWORD".equals(this.token)) {
+			matchNextToken("SUBSTRACT_KEYWORD");
+			expression();
+			matchNextToken("FROM_KEYWORD");
+			matchNextToken("IDENTIFIER");
+			endInst();
+		}
+		else if("MULTIPLY_KEYWORD".equals(this.token)) {
+			matchNextToken("MULTIPLY_KEYWORD");
+			assignEnd();
+			endInst();
+		}
+		else if("DIVIDE_KEYWORD".equals(this.token)) {
+			matchNextToken("DIVIDE_KEYWORD");
+			assignEnd();
+			endInst();
+		}
+	}
+	
+	private void assignEnd() {
+		expression();
+		matchNextToken("COMMA");
+		expression();
+		matchNextToken("GIVING_KEYWORD");
+		matchNextToken("IDENTIFIER");
+	}
+	
+	private void expression() {
+		expAnd();
+		expressionLR();
+	}
+	
+	private void expressionLR() {
+		if("OR_KEYWORD".equals(this.token)) {
+			matchNextToken("OR_KEYWORD");
+			expAnd();
+			expressionLR();
+		}
+		else if("TO_KEYWORD".equals(this.token) || "DOT_KEYWORD".equals(this.token) ||
+				"FROM_KEYWORD".equals(this.token) || "COMMA".equals(this.token) ||
+				"GIVING_KEYWORD".equals(this.token) ||
+				"CLOSING_PARENTHESIS_KEYWORD".equals(this.token) ||
+				"THEN_KEYWORD".equals(this.token)) {
+			//epsilon
+		}
+	}
+	
+	private void expAnd() {
+		expEqual();
+		expAndLR();
+	}
+	
+	private void expAndLR() {
+		if("AND_KEYWORD".equals(this.token)) {
+			matchNextToken("AND_KEYWORD");
+			expEqual();
+			expAndLR();
+		}
+		else if("OR_KEYWORD".equals(this.token)) {
+			//epsilon
+		}
+	}
+	
+	private void expEqual() {
+		expAdd();
+		expEqualLR();
+	}
+	
+	private void expEqualLR() {
+		if("EQUALS_SIGN".equals(this.token)) {
+			matchNextToken("EQUALS_SIGN");
+			expAdd();
+		}
+		else if("LOWER_THAN".equals(this.token)) {
+			matchNextToken("LOWER_THAN");
+			expAdd();
+		}
+		else if("GREATER_THAN".equals(this.token)) {
+			matchNextToken("GREATER_THAN");
+			expAdd();
+		}
+		else if("LOWER_OR_EQUAL".equals(this.token)) {
+			matchNextToken("LOWER_OR_EQUAL");
+			expAdd();
+		}
+		else if("GREATER_OR_EQUAL".equals(this.token)) {
+			matchNextToken("GREATER_OR_EQUAL");
+			expAdd();
+		}
+		else if("AND_KEYWORD".equals(this.token)) {
+			//epsilon
+		}
+	}
+	
+	private void expAdd() {
+		expMult();
+		expAddLR();
+	}
+	
+	private void expAddLR() {
+		if("PLUS_SIGN".equals(this.token)) {
+			matchNextToken("PLUS_SIGN");
+			expMult();
+			expAddLR();
+		}
+		else if("MINUS_SIGN".equals(this.token)) {
+			matchNextToken("MINUS_SIGN");
+			expMult();
+			expAddLR();
+		}
+		else if("EQUALS_SIGN".equals(this.token) || "LOWER_THAN".equals(this.token) ||
+				"GREATER_THAN".equals(this.token) || "LOWER_OR_EQUAL".equals(this.token) ||
+				"GREATER_OR_EQUAL".equals(this.token)) {
+			//epsilon
+		}
+	}
+	
+	private void expMult() {
+		expNot();
+		expMultLR();
+	}
+	
+	private void expMultLR() {
+		if("MULTIPLICATION_SIGN".equals(this.token)) {
+			matchNextToken("MULTIPLICATION_SIGN");
+			expNot();
+			expMultLR();
+		}
+		else if("DIVISION_SIGN".equals(this.token)) {
+			matchNextToken("DIVISION_SIGN");
+			expNot();
+			expMultLR();
+		}
+		else if("PLUS_SIGN".equals(this.token) || "MINUS_SIGN".equals(this.token)) {
+			//espilon
+		}
+	}
+	
+	private void expNot() {
+		if("MINUS_SIGN".equals(this.token)) {
+			matchNextToken("MINUS_SIGN");
+			expNot();
+		}
+		else if("NOT_KEYWORD".equals(this.token)) {
+			matchNextToken("NOT_KEYWORD");
+			expNot();
+		}
+		else if("OPENING_PARENTHESIS".equals(this.token) || "IDENTIFIER".equals(this.token) ||
+				"INTEGER".equals(this.token) || "TRUE_KEYWORD".equals(this.token) ||
+				"FALSE_KEYWORD".equals(this.token)) {
+			expressionParenthesis();
+		}
+	}
+	
+	private void expressionParenthesis() {
+		if("OPENING_PARENTHESIS".equals(this.token)) {
+			matchNextToken("OPENING_PARENTHESIS");
+			expression();
+			matchNextToken("CLOSING_PARENTHESIS");
+		}
+		else if("IDENTIFIER".equals(this.token) ||
+				"INTEGER".equals(this.token) || "TRUE_KEYWORD".equals(this.token) ||
+				"FALSE_KEYWORD".equals(this.token)) {
+			expTerm();
+		}
+	}
+	
+	private void expTerm() {
+		if("IDENTIFIER".equals(this.token)) {
+			matchNextToken("IDENTIFIER");
+		}
+		else if("INTEGER".equals(this.token)) {
+			matchNextToken("INTEGER");
+		}
+		else if("TRUE_KEYWORD".equals(this.token)) {
+			matchNextToken("TRUE_KEYWORD");
+		}
+		else if("FALSE_KEYWORD".equals(this.token)) {
+			matchNextToken("FALSE_KEYWORD");
+		}
+	}
+	
+	private void ifRule() {
+		matchNextToken("IF_KEYWORD");
+		expression();
+		matchNextToken("THEN_KEYWORD");
+		instructionList();
+		ifEnd();
+	}
+	
+	private void ifEnd() {
+		if("ELSE_KEYWORD".equals(this.token)) {
+			matchNextToken("ELSE_KEYWORD");
+			instructionList();
+			matchNextToken("ENDI-IF_KEYWORD");
+		}
+		else if("ENDI-IF_KEYWORD".equals(this.token)) {
+			matchNextToken("ENDI-IF_KEYWORD");
+		}
+	}
+	
+	private void call() {
+		matchNextToken("PERFORM_KEYWORD");
+		matchNextToken("IDENTIFIER");
+		callTail();
+	}
+	
+	private void callTail() {
+		if("UNTIL_KEYWORD".equals(this.token)) {
+			matchNextToken("UNTIL_KEYWORD");
+			expression();
+			System.out.println("callTrail>UNTIL>juste before endInst();");
+			endInst();
+		}
+		else if("END_OF_INSTRUCTION".equals(this.token)) {
+			endInst();
+		}
+	}
+	
+	private void read() {
+		matchNextToken("ACCEPT_KEYWORD");
+		matchNextToken("IDENTIFIER");
+		endInst();
+	}
+	
+	private void write() {
+		matchNextToken("DISPLAY_KEYWORD");
+		writeTail();
+	}
+	
+	private void writeTail() {
+		if("OPENING_PARENTHESIS".equals(this.token) || "IDENTIFIER".equals(this.token) ||
+				"INTEGER".equals(this.token) || "TRUE_KEYWORD".equals(this.token) ||
+				"FALSE_KEYWORD".equals(this.token) || "MINUS_SIGN".equals(this.token)||
+				"NOT_KEYWORD".equals(this.token)) {
+			expression();
+			endInst();
+		}
+		else if("STRING".equals(this.token)) {
+			System.out.println("writeTail>else if\"STRING\", just before matchNextToken(STRING)");
+			matchNextToken("STRING");
+			endInst();
+		}
 	}
 	
 	/**
