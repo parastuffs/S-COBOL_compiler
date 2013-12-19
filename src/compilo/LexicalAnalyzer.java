@@ -223,6 +223,12 @@ public class LexicalAnalyzer {
 				couple[0] = sub[0];
 				searchTokenType(couple);
 			}
+			//Yet another case: the final '.#' combination.
+			if(!this.found) {
+				sub = input.split("#");
+				couple[0] = sub[0];
+				searchTokenType(couple);
+			}
 		}
 		return couple;
 	}
