@@ -26,12 +26,12 @@ public class Parser {
 		this.input = this.input.replaceAll("^\\ *", "");//Removes all the preceding white spaces.
 		if(this.newLine) {
 			this.lineNum ++;
+			//System.out.println("New line. input='"+this.input+"'");
 		}
 		lexCouple = this.lex.nextToken(this.input, this.newLine, this.lineNum);
 		this.token = lexCouple[1];//We know consider that the token is the lexical unit...
 		this.terminal = lexCouple[0];//... and the token becomes the terminal.
 		//TODO check if token == ERROR
-		this.newLine = false;
 		
 		//TESTS ###
 		
@@ -57,7 +57,15 @@ public class Parser {
 			System.err.println("Error trying to match tos='"+toMatch+"' with '"+this.token+
 					"' (which is '"+this.terminal+"')");
 		}
-		nextToken();
+		
+		//do {
+			nextToken();
+			//Comments are simply ignored by the parser
+			if("COMMENT".equals(this.token)) {
+				matchNextToken("COMMENT");
+			}
+		//} while("COMMENT".equals(this.token));
+		this.newLine = false;
 	}
 	
 	private void program() {
@@ -66,6 +74,8 @@ public class Parser {
 		data();
 		proc();
 		matchNextToken("FINAL_SYMBOL");//Match the final Symbol
+		
+		//this.lex.printSymbolsTable();
 	}
 	
 	private void ident() {		
@@ -138,7 +148,50 @@ public class Parser {
 	}
 	
 	private void data() {
+		matchNextToken("DATA_KEYWORD");
+		matchNextToken("DIVISION_KEYWORD");
+		endInst();
+		matchNextToken("WORKING-STORAGE_KEYWORD");
+		matchNextToken("SECTION_KEYWORD");
+		endInst();
+		varList();
+	}
+	
+	private void varList() {
+		if("INTEGER".equals(this.token)) {
+			//System.out.println("Inside varList.INTEGER");
+			varDecl();
+			varList();
+		}
+		else if("PROCEDURE_KEYWORD".equals(this.token)) {
+			//espilon
+		}
+	}
+	
+	private void varDecl() {
+		level();
+		matchNextToken("IDENTIFIER");
+		matchNextToken("PIC_KEYWORD");
+		matchNextToken("IMAGE");
+		varDeclTail();
 		
+	}
+	
+	private void level() {
+		matchNextToken("INTEGER");
+	}
+	
+	private void varDeclTail() {
+		if("VALUE_KEYWORD".equals(this.token)) {
+			matchNextToken("VALUE_KEYWORD");
+			matchNextToken("INTEGER");
+			endInst();
+		}
+		else if("END_OF_INSTRUCTION".equals(this.token)) {
+			//WARNING, the follow table indicates a DOT ('.'), but it
+			//actually is the DOT of the END_OF_INSTRUCTION ('.\n').
+			endInst();
+		}
 	}
 	
 	private void proc() {

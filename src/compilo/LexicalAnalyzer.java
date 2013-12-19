@@ -146,7 +146,8 @@ public class LexicalAnalyzer {
 	 * @return True if the input matches the regex.
 	 */
 	private boolean isComment(String input, boolean newLine) {
-		return (newLine && (input.matches("((\\*)|(/)).*\n$")));
+		//System.out.println("Inside isComment(). newLine="+newLine+", input='"+input+"'");
+		return (newLine && (input.matches("^((\\*)|(/)).*\n((.*)|(\n))*")));
 	}
 	
 	//TODO update javadoc
@@ -184,8 +185,15 @@ public class LexicalAnalyzer {
 		String[] couple = {"",""};
 		this.lineNum = lineNum;
 		
+		//TEST###
+		if(newLine) {
+			//System.out.println("> NEWLINE with input = '"+input+"'");
+		}
+		//###
+		
 		//Comment line
 		if(isComment(input,newLine)) {
+			input = input.substring(0, input.indexOf("\n")+1);//Keep only the comment
 			couple[0] = input;
 			couple[1] = "COMMENT";
 		}
@@ -222,7 +230,7 @@ public class LexicalAnalyzer {
 	//TODO javadoc
 	private String[] searchTokenType(String[] couple) {
 		int n;
-		//System.out.println("String rtying to find the lexical unit of: '"+couple[0]+"'");
+		//System.out.println("String trying to find the lexical unit of: '"+couple[0]+"'");
 		
 		//The identifier may end with a dot or dot+\n:
 		if(couple[0].matches(".+\\.$") || couple[0].matches(".+\\.\\n$")) {
