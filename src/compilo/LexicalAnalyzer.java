@@ -258,7 +258,7 @@ public class LexicalAnalyzer {
 		else if((n=this.keywords.indexOf(couple[0])) >= 0) {
 			couple[1] = this.units.get(n);
 			this.found = true;
-			this.variable[0] = null;
+			//this.variable[0] = null;//if we set this at null here, the variable table won't be filled because the declaration of a variable is now like 'a pic s9(5)' (pic)
 			this.label[0] = null;
 		}
 		else if(isString(couple[0])) {

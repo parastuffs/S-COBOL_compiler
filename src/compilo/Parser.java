@@ -49,8 +49,8 @@ public class Parser {
 			}
 			this.terminal = escapeChar(this.terminal);
 			this.input = this.input.replaceFirst(this.terminal, "");
-			System.out.println("Match successful of '"+this.token+"' (terminal='"+this.terminal+"'");
-			System.out.println("Left on the input: '"+this.input+"'");
+			//System.out.println("Match successful of '"+this.token+"' (terminal='"+this.terminal+"'");
+			//System.out.println("Left on the input: '"+this.input+"'");
 		}
 		else {
 			System.err.println("Error trying to match tos='"+toMatch+"' with '"+this.token+
@@ -74,7 +74,7 @@ public class Parser {
 		proc();
 		matchNextToken("FINAL_SYMBOL");//Match the final Symbol
 		
-		//this.lex.printSymbolsTable();
+		this.lex.printSymbolsTable();
 	}
 	
 	private void ident() {		
