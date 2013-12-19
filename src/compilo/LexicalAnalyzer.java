@@ -65,7 +65,7 @@ public class LexicalAnalyzer {
 				"program","stop","run","move","to","compute","add","substract","multiply",
 				"divide","giving",",","(",")","-","+","=","*","/","not","true","false",
 				"<",">","<=",">=","and","or","if","else","end-if","until","accept","display",
-				"from","by", "#"));
+				"from","by", "#", "perform"));
 
 		this.units = new ArrayList<String>( Arrays.asList("IDENTIFICATION_KEYWORD","DIVISION_KEYWORD","PROGRAM-ID_KEYWORD",
 				"AUTHOR_KEYWORD","DOT_KEYWORD","END_OF_LINE","DATE_WRITTEN_KEYWORD","ENVIRONMENT_KEYWORD",
@@ -78,7 +78,7 @@ public class LexicalAnalyzer {
 				"DIVISION_SIGN","NOT_KEYWORD","TRUE_KEYWORD","FALSE_KEYWORD","LOWER_THAN",
 				"GREATER_THAN","LOWER_OR_EQUAL","GREATER_OR_EQUAL","AND_KEYWORD","OR_KEYWORD",
 				"IF_KEYWORD","ELSE_KEYWORD","ENDI-IF_KEYWORD","UNTIL_KEYWORD","ACCEPT_KEYWORD",
-				"DISPLAY_KEYWORD","FROM_KEYWORD","BY_KEYWORD", "FINAL_SYMBOL"));
+				"DISPLAY_KEYWORD","FROM_KEYWORD","BY_KEYWORD", "FINAL_SYMBOL", "PERFORM_KEYWORD"));
 
 		this.symTab = new SymbolsTable();
 	}
