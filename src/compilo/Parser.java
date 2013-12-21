@@ -6,11 +6,13 @@ public class Parser {
 	private String input;
 	private String token, terminal;
 	private int lineNum;
+	private String programId;
 	
 	/** Tells whether we are on a new line or not.*/
 	private boolean newLine;
 	
 	public Parser(LexicalAnalyzer l) {
+		this.programId = null;
 		this.lex = l;
 		this.lineNum = 0;
 		this.newLine = true;
@@ -83,6 +85,7 @@ public class Parser {
 		endInst();
 		matchNextToken("PROGRAM-ID_KEYWORD");//program-id
 		matchNextToken("DOT_KEYWORD");//dot
+		checkProgramId();
 		matchNextToken("IDENTIFIER");//IDENTIFIER
 		endInst();
 		matchNextToken("AUTHOR_KEYWORD");//author
@@ -203,6 +206,7 @@ public class Parser {
 		labels();
 		matchNextToken("END_KEYWORD");
 		matchNextToken("PROGRAM_KEYWORD");
+		checkProgramId();
 		matchNextToken("IDENTIFIER");
 		matchNextToken("DOT_KEYWORD");
 	}
@@ -534,6 +538,33 @@ public class Parser {
 			System.out.println("writeTail>else if\"STRING\", just before matchNextToken(STRING)");
 			matchNextToken("STRING");
 			endInst();
+		}
+	}
+	
+	/**
+	 * Check if the program id the same at the beginning and
+	 * the end of the code.
+	 * If the program as not been initialized yet, it means
+	 * we are at the beginning of the source code and we initialize
+	 * it with the value of the current terminal - supposed to be
+	 * an identifier.
+	 * Else, it means we are at the end of the source, thus we check
+	 * the program id is correct.
+	 * 
+	 * In case of non correspondence, an error is raised.
+	 */
+	private void checkProgramId() {
+		if("IDENTIFIER".equals(this.token)) {
+			if(this.programId == null) {
+				this.programId = this.terminal;
+			}
+			else {
+				if(!this.programId.equals(this.terminal)) {
+					new RaiseError("The program-id does not match.\n" +
+							"\tExpected: '"+this.programId+"'\n"+
+							"\tEncountered: '"+this.terminal+"\'n");
+				}
+			}
 		}
 	}
 	
