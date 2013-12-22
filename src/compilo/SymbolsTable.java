@@ -34,7 +34,7 @@ public class SymbolsTable {
 	
 	/**
 	 * <p>Table of symbols</p>
-	 * <p>Name, Initialization, Type (signed int, unsigned int)</p>
+	 * <p>Name, Initialization, Type (signed int, unsigned int), digits</p>
 	 */
 	private List<String[]> tos;
 	
@@ -118,13 +118,13 @@ public class SymbolsTable {
 			output += this.labels.get(i) + "\t" + this.labels.get(i+1) + "\n";
 		}
 		output+="\n";
-		output+="Name \t Initial value \t Type \n";
+		output+="Name \t Initial value \t Type \t Digits\n";
 		
 		Iterator<String[]> it = this.tos.iterator();
 		while(it.hasNext()) {
 			String[] str = it.next();
 		//for(String[] str : this.tos) {
-			output+=str[0]+"\t"+str[1]+"\t"+str[2]+"\n";
+			output+=str[0]+"\t"+str[1]+"\t"+str[2]+"\t"+str[3]+"\n";
 		}
 		return output;
 	}
@@ -159,10 +159,11 @@ public class SymbolsTable {
 	
 	public void newEntry(String[] entry) {
 		//Adding directly entry doesn't work, we would give the address of the array, not its values.
-		String[] tmp = {"","",""};
+		String[] tmp = {"","","", ""};
 		tmp[0] = entry[0];
 		tmp[1] = entry[1];
 		tmp[2] = entry[2];
+		tmp[3] = entry[3];
 		this.tos.add(tmp);
 	}
 }

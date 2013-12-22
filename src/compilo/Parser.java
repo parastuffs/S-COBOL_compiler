@@ -1,5 +1,8 @@
 package compilo;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Parser {
 
 	private LexicalAnalyzer lex;
@@ -12,8 +15,8 @@ public class Parser {
 	private boolean newLine;
 	private SymbolsTable tos;
 
-	/**Name, Initialization, Type*/
-	private String[] tosEntry = {"", "", ""};
+	/**Name, Initialization, Type, Digits*/
+	private String[] tosEntry = {"", "", "", ""};
 	
 	public Parser(LexicalAnalyzer l, SymbolsTable tos) {
 		this.tos = tos;
@@ -196,6 +199,18 @@ public class Parser {
 		else if(this.token.matches("^9.*")) {
 			this.tosEntry[2] = "unsigned int";
 		}
+		
+		//Extracting the digits
+		Pattern pat = Pattern.compile("^s?9(\\(([1-9])\\))?");
+		Matcher m = pat.matcher(this.terminal);
+		if(m.matches()) {
+			if(m.group(2) != null) {
+				this.tosEntry[3] = m.group(2);
+			}
+			else {
+				this.tosEntry[3] = "1";
+			}
+		}
 		matchNextToken("IMAGE");
 		varDeclTail();
 		
@@ -203,6 +218,7 @@ public class Parser {
 		this.tosEntry[0] = "";
 		this.tosEntry[1] = "";
 		this.tosEntry[2] = "";
+		this.tosEntry[3] = "";
 		
 	}
 	
@@ -215,6 +231,12 @@ public class Parser {
 			//Initialization of the variable
 			matchNextToken("VALUE_KEYWORD");
 			
+			int maxLength = Integer.parseInt(this.tosEntry[3]);
+			if(this.tosEntry[2].matches("^.*int") && this.terminal.length() > maxLength) {
+				new RaiseError("Bad integer initialization for variable "+this.tosEntry[0]+
+						"\n\tExpecting: length = "+maxLength+
+						"\n\tEncountered: length = "+this.terminal.length()+"\n");
+			}
 			this.tosEntry[1] = this.terminal;
 			matchNextToken("INTEGER");
 			endInst();

@@ -15,6 +15,8 @@ data division.
        77 b pic s9(5).
       /(5) for 5 digits.
        77 c pic s9(6).
+       77 d pic s9.
+      / 77 e pic s9 value 42.
 procedure division.
 	main section.
 	* Euclide’s Algorithm.
