@@ -58,7 +58,8 @@ public class LexicalAnalyzer {
 	 * Creates the table of symbols.
 	 * </p>
 	 */
-	public LexicalAnalyzer() {
+	public LexicalAnalyzer(SymbolsTable tos) {
+		this.symTab = tos;
 		this.keywords = new ArrayList<String>(Arrays.asList("identification","division","program-id","author",".",
 				"\n","date-written","environment","configuration","section","source-computer",
 				"object-computer","data","working-storage","pic","value","procedure","end",
@@ -80,7 +81,6 @@ public class LexicalAnalyzer {
 				"IF_KEYWORD","ELSE_KEYWORD","ENDI-IF_KEYWORD","UNTIL_KEYWORD","ACCEPT_KEYWORD",
 				"DISPLAY_KEYWORD","FROM_KEYWORD","BY_KEYWORD", "FINAL_SYMBOL", "PERFORM_KEYWORD", "THEN_KEYWORD"));
 
-		this.symTab = new SymbolsTable();
 	}
 	
 	/**

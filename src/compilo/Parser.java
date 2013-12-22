@@ -10,8 +10,13 @@ public class Parser {
 	
 	/** Tells whether we are on a new line or not.*/
 	private boolean newLine;
+	private SymbolsTable tos;
+
+	/**Name, Initialization, Type*/
+	private String[] tosEntry = {"", "", ""};
 	
-	public Parser(LexicalAnalyzer l) {
+	public Parser(LexicalAnalyzer l, SymbolsTable tos) {
+		this.tos = tos;
 		this.programId = null;
 		this.lex = l;
 		this.lineNum = -1;
@@ -42,6 +47,7 @@ public class Parser {
 		this.input = input;
 		nextToken();
 		program();
+		System.out.println(this.tos.toString());
 	}
 	
 	private void matchNextToken(String toMatch) {
@@ -59,6 +65,7 @@ public class Parser {
 					"' (which is '"+this.terminal+"')");
 		}
 		
+		//TODO remove dead code
 		//do {
 			nextToken();
 			//Comments are simply ignored by the parser
@@ -76,7 +83,7 @@ public class Parser {
 		proc();
 		matchNextToken("FINAL_SYMBOL");//Match the final Symbol
 		
-		this.lex.printSymbolsTable();
+		//this.lex.printSymbolsTable();
 	}
 	
 	private void ident() {		
@@ -177,10 +184,25 @@ public class Parser {
 	
 	private void varDecl() {
 		level();
+		
+		this.tosEntry[0] = this.terminal;
 		matchNextToken("IDENTIFIER");
+		
 		matchNextToken("PIC_KEYWORD");
+		
+		if(this.terminal.matches("^s9.*")) {
+			this.tosEntry[2] = "signed int";
+		}
+		else if(this.token.matches("^9.*")) {
+			this.tosEntry[2] = "unsigned int";
+		}
 		matchNextToken("IMAGE");
 		varDeclTail();
+		
+		this.tos.newEntry(this.tosEntry);
+		this.tosEntry[0] = "";
+		this.tosEntry[1] = "";
+		this.tosEntry[2] = "";
 		
 	}
 	
@@ -190,7 +212,10 @@ public class Parser {
 	
 	private void varDeclTail() {
 		if("VALUE_KEYWORD".equals(this.token)) {
+			//Initialization of the variable
 			matchNextToken("VALUE_KEYWORD");
+			
+			this.tosEntry[1] = this.terminal;
 			matchNextToken("INTEGER");
 			endInst();
 		}
@@ -236,6 +261,7 @@ public class Parser {
 	}
 	
 	private void label() {
+		//Gives the name of a method, like 'start' or 'find'
 		matchNextToken("IDENTIFIER");
 	}
 	

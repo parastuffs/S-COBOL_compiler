@@ -47,8 +47,9 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 	
-		LexicalAnalyzer lex = new LexicalAnalyzer();
-		Parser parser = new Parser(lex);
+		SymbolsTable tos = new SymbolsTable();
+		LexicalAnalyzer lex = new LexicalAnalyzer(tos);
+		Parser parser = new Parser(lex, tos);
 		
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(

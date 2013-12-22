@@ -1,5 +1,6 @@
 package compilo;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -32,12 +33,19 @@ public class SymbolsTable {
 	private List<String> labels;
 	
 	/**
+	 * <p>Table of symbols</p>
+	 * <p>Name, Initialization, Type (signed int, unsigned int)</p>
+	 */
+	private List<String[]> tos;
+	
+	/**
 	 * <p>Constructor.</p>
 	 * <p>The lists are simply created.</p>
 	 */
 	SymbolsTable() {
 		this.variables = new ArrayList<String>();
 		this.labels = new ArrayList<String>();
+		this.tos = new ArrayList<String[]>();
 	}
 	
 	/**
@@ -108,7 +116,16 @@ public class SymbolsTable {
 		output += "\nlabels\n";
 		for(int i=0;i<this.labels.size();i+=2) {
 			output += this.labels.get(i) + "\t" + this.labels.get(i+1) + "\n";
-		}	
+		}
+		output+="\n";
+		output+="Name \t Initial value \t Type \n";
+		
+		Iterator<String[]> it = this.tos.iterator();
+		while(it.hasNext()) {
+			String[] str = it.next();
+		//for(String[] str : this.tos) {
+			output+=str[0]+"\t"+str[1]+"\t"+str[2]+"\n";
+		}
 		return output;
 	}
 
@@ -138,5 +155,14 @@ public class SymbolsTable {
 			}
 			size-=2;
 		}
+	}
+	
+	public void newEntry(String[] entry) {
+		//Adding directly entry doesn't work, we would give the address of the array, not its values.
+		String[] tmp = {"","",""};
+		tmp[0] = entry[0];
+		tmp[1] = entry[1];
+		tmp[2] = entry[2];
+		this.tos.add(tmp);
 	}
 }

@@ -10,11 +10,11 @@ data division.
       /we define 3 variables (a, b, c).
        working-storage section.
       /s for signed.
-       77 a pic s9(5).
+       77 a pic s9(5) value 0.
       /9 for digit (int).
        77 b pic s9(5).
       /(5) for 5 digits.
-       77 c pic s9(5).
+       77 c pic s9(6).
 procedure division.
 	main section.
 	* Euclide’s Algorithm.
