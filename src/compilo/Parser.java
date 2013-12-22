@@ -101,6 +101,11 @@ public class Parser {
 	private void endInst() {
 		this.newLine = true;//We just ended a line, thus begining a new one.
 		matchNextToken("END_OF_INSTRUCTION");
+		//TEST ###
+//		System.out.println("End of line, thus new line.");
+//		System.out.println("Next terminal: '"+this.terminal+"'");
+//		System.out.println("line="+this.lineNum);
+		//###
 	}
 	
 	private void words() {

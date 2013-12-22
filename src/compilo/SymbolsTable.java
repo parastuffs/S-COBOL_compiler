@@ -80,6 +80,7 @@ public class SymbolsTable {
 	 * @see SymbolsTable#labels
 	 */
 	public void addLabel(String[] newLab) {
+		System.out.println("symbolsTable.addLabel: line "+newLab[1]+ " with '"+newLab[0]+"'");
 		if(this.labels.contains(newLab[0])) {
 			if(!this.labels.get(this.labels.lastIndexOf(newLab[0])+1).equals(newLab[1])) {
 				this.labels.add(newLab[0]);
@@ -124,19 +125,14 @@ public class SymbolsTable {
 		String temp[] = {"",""};
 		while(!ordered) {
 			ordered = true;
-			for(int i=0;i<size-3;i++) {
+			for(int i=0;i<size-3;i+=2) {
 				if(list.get(i).compareTo(list.get(i+2)) > 0) {
-					//Note that add and remove shift the rest of the ArrayList
 					temp[0] = list.get(i+2);
 					temp[1] = list.get(i+3);
-					list.remove(i+3);
-					list.remove(i+2);
-					list.add(i+2,list.get(i));
-					list.add(i+3,list.get(i+1));
-					list.remove(i+1);
-					list.remove(i);
-					list.add(i,temp[0]);
-					list.add(i+1,temp[1]);
+					list.set(i+2, list.get(i));
+					list.set(i+3, list.get(i+1));
+					list.set(i, temp[0]);
+					list.set(i+1, temp[1]);
 					ordered = false;
 				}
 			}
