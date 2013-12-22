@@ -14,7 +14,7 @@ public class Parser {
 	public Parser(LexicalAnalyzer l) {
 		this.programId = null;
 		this.lex = l;
-		this.lineNum = 0;
+		this.lineNum = -1;
 		this.newLine = true;
 	}
 	
