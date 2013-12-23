@@ -15,8 +15,17 @@ public class Parser {
 	private boolean newLine;
 	private SymbolsTable tos;
 
-	/**Name, Initialization, Type, Digits*/
-	private String[] tosEntry = {"", "", "", ""};
+	/**Name, Initialization, Type, Digits, Current Value*/
+	private String[] tosEntry = {"", "", "", "", ""};
+	
+	private VariableInteger varLeftMult=null;
+	private VariableInteger varRightMult=null;
+	private VariableInteger varLeftAdd;
+	private VariableInteger varRightAdd;
+	private VariableInteger varLeftEq;
+	private VariableInteger varRightEq;
+	private VariableInteger varLeftAnd;
+	private VariableInteger varRightAnd;
 	
 	public Parser(LexicalAnalyzer l, SymbolsTable tos) {
 		this.tos = tos;
@@ -219,6 +228,7 @@ public class Parser {
 		this.tosEntry[1] = "";
 		this.tosEntry[2] = "";
 		this.tosEntry[3] = "";
+		this.tosEntry[4] = "";
 		
 	}
 	
@@ -238,6 +248,7 @@ public class Parser {
 						"\n\tEncountered: length = "+this.terminal.length()+"\n");
 			}
 			this.tosEntry[1] = this.terminal;
+			this.tosEntry[4] = this.terminal;
 			matchNextToken("INTEGER");
 			endInst();
 		}
@@ -330,8 +341,18 @@ public class Parser {
 	private void assignation() {
 		if("MOVE_KEYWORD".equals(this.token)) {
 			matchNextToken("MOVE_KEYWORD");
-			expression();
+			VariableInteger moveFrom = expression();
 			matchNextToken("TO_KEYWORD");
+			
+			//Need to check the number of digits
+			int maxLengthTo = this.tos.getMaxLengthOf(this.terminal);
+			if(maxLengthTo == -1) {
+				new RaiseError(this.terminal+" has not been initialiazed.");
+			}
+			if(maxLengthTo < moveFrom.getMaxDigits()) {
+				new RaiseWarning("Warning: "+this.terminal+" will contain "+
+						moveFrom.getMaxDigits()+" instead of maximum "+maxLengthTo);
+			}
 			matchNextToken("IDENTIFIER");
 			endInst();
 		}
@@ -376,9 +397,10 @@ public class Parser {
 		matchNextToken("IDENTIFIER");
 	}
 	
-	private void expression() {
-		expAnd();
+	private VariableInteger expression() {
+		VariableInteger varInt = expAnd();
 		expressionLR();
+		return varInt;
 	}
 	
 	private void expressionLR() {
@@ -396,15 +418,16 @@ public class Parser {
 		}
 	}
 	
-	private void expAnd() {
-		expEqual();
+	private VariableInteger expAnd() {
+		VariableInteger var = expEqual();
 		expAndLR();
+		return var;
 	}
 	
 	private void expAndLR() {
 		if("AND_KEYWORD".equals(this.token)) {
 			matchNextToken("AND_KEYWORD");
-			expEqual();
+			this.varRightAnd = expEqual();
 			expAndLR();
 		}
 		else if("OR_KEYWORD".equals(this.token)) {
@@ -412,15 +435,27 @@ public class Parser {
 		}
 	}
 	
-	private void expEqual() {
-		expAdd();
-		expEqualLR();
+	private VariableInteger expEqual() {
+		this.varLeftEq = expAdd();
+		return expEqualLR();
 	}
 	
-	private void expEqualLR() {
+	private VariableInteger expEqualLR() {
 		if("EQUALS_SIGN".equals(this.token)) {
 			matchNextToken("EQUALS_SIGN");
-			expAdd();
+			this.varRightEq = expAdd();
+			if(this.varLeftEq != null && this.varRightEq != null) {
+				if(!"".equals(this.varLeftEq.getValue()) && !"".equals(this.varRightEq.getValue())) {
+					this.varLeftEq.setValue(Integer.toString(
+							(Integer.parseInt(this.varLeftEq.getValue()))));
+					this.varLeftEq.setMaxDigits(this.varLeftEq.getValue().length());
+				}
+				else {
+					int maxDigits = (this.varLeftEq.getMaxDigits()>=this.varRightEq.getMaxDigits())?
+							this.varLeftEq.getMaxDigits():this.varRightEq.getMaxDigits();
+					this.varLeftEq.setMaxDigits(maxDigits);
+				}
+			}
 		}
 		else if("LOWER_THAN".equals(this.token)) {
 			matchNextToken("LOWER_THAN");
@@ -441,21 +476,37 @@ public class Parser {
 		else if("AND_KEYWORD".equals(this.token)) {
 			//epsilon
 		}
+		
+		return this.varLeftEq;
 	}
 	
-	private void expAdd() {
-		expMult();
-		expAddLR();
+	private VariableInteger expAdd() {
+		this.varLeftAdd = expMult();
+		return expAddLR();
 	}
 	
-	private void expAddLR() {
+	private VariableInteger expAddLR() {
 		if("PLUS_SIGN".equals(this.token)) {
 			matchNextToken("PLUS_SIGN");
-			expMult();
+			this.varRightAdd = expMult();
+			if(this.varLeftAdd != null && this.varRightAdd != null) {
+				if(!"".equals(this.varLeftAdd.getValue()) && !"".equals(this.varRightAdd.getValue())) {
+					this.varLeftAdd.setValue(Integer.toString(
+							(Integer.parseInt(this.varLeftAdd.getValue())
+							+Integer.parseInt(this.varRightAdd.getValue()))));
+					this.varLeftAdd.setMaxDigits(this.varLeftAdd.getValue().length());
+				}
+				else {
+					int maxDigits = (this.varLeftAdd.getMaxDigits()>=this.varRightAdd.getMaxDigits())?
+							this.varLeftAdd.getMaxDigits():this.varRightAdd.getMaxDigits();
+					this.varLeftAdd.setMaxDigits(maxDigits);
+				}
+			}
 			expAddLR();
 		}
 		else if("MINUS_SIGN".equals(this.token)) {
 			matchNextToken("MINUS_SIGN");
+			//TODO
 			expMult();
 			expAddLR();
 		}
@@ -464,30 +515,53 @@ public class Parser {
 				"GREATER_OR_EQUAL".equals(this.token)) {
 			//epsilon
 		}
+		
+		return this.varLeftAdd;
 	}
 	
-	private void expMult() {
-		expNot();
-		expMultLR();
+	private VariableInteger expMult() {
+		this.varLeftMult = expNot();//
+		return expMultLR();
 	}
 	
-	private void expMultLR() {
+	private VariableInteger expMultLR() {
 		if("MULTIPLICATION_SIGN".equals(this.token)) {
 			matchNextToken("MULTIPLICATION_SIGN");
-			expNot();
+			this.varRightMult = expNot();//Now it should be time to do left * right
+			//TODO en fait, si les variables ne sont pas initialisées, on ne peut rien faire.
+			//Du coup, il faudrait d'abord vérifier que le terminal a bien une valeur assignée
+			//dans la table des symboles. Si oui, on calcule, si non, on remonte simplement
+			//l'image avec le plus grand nombre de digits (worst case scenario).
+			if(this.varLeftMult != null && this.varRightMult != null) {
+				if(!"".equals(this.varLeftMult.getValue()) && !"".equals(this.varRightMult.getValue())) {
+					this.varLeftMult.setValue(Integer.toString(
+							(Integer.parseInt(this.varLeftMult.getValue())
+							*Integer.parseInt(this.varRightMult.getValue()))));
+					this.varLeftMult.setMaxDigits(this.varLeftMult.getValue().length());
+				}
+				else {
+					int maxDigits = (this.varLeftMult.getMaxDigits()>=this.varRightMult.getMaxDigits())?
+							this.varLeftMult.getMaxDigits():this.varRightMult.getMaxDigits();
+					this.varLeftMult.setMaxDigits(maxDigits);
+				}
+			}
+			
 			expMultLR();
 		}
 		else if("DIVISION_SIGN".equals(this.token)) {
 			matchNextToken("DIVISION_SIGN");
+			//TODO
 			expNot();
 			expMultLR();
 		}
 		else if("PLUS_SIGN".equals(this.token) || "MINUS_SIGN".equals(this.token)) {
 			//espilon
 		}
+		return this.varLeftMult;
 	}
 	
-	private void expNot() {
+	private VariableInteger expNot() {
+		VariableInteger var = null;
 		if("MINUS_SIGN".equals(this.token)) {
 			matchNextToken("MINUS_SIGN");
 			expNot();
@@ -499,28 +573,38 @@ public class Parser {
 		else if("OPENING_PARENTHESIS".equals(this.token) || "IDENTIFIER".equals(this.token) ||
 				"INTEGER".equals(this.token) || "TRUE_KEYWORD".equals(this.token) ||
 				"FALSE_KEYWORD".equals(this.token)) {
-			expressionParenthesis();
+			var = expressionParenthesis();
 		}
+		return var;
 	}
 	
-	private void expressionParenthesis() {
+	private VariableInteger expressionParenthesis() {
+		VariableInteger var=null;
 		if("OPENING_PARENTHESIS".equals(this.token)) {
 			matchNextToken("OPENING_PARENTHESIS");
-			expression();
+			var = expression();
 			matchNextToken("CLOSING_PARENTHESIS");
 		}
 		else if("IDENTIFIER".equals(this.token) ||
 				"INTEGER".equals(this.token) || "TRUE_KEYWORD".equals(this.token) ||
 				"FALSE_KEYWORD".equals(this.token)) {
-			expTerm();
+			var = expTerm();
 		}
+		return var;
 	}
 	
-	private void expTerm() {
+	private VariableInteger expTerm() {
+		VariableInteger var=null;
 		if("IDENTIFIER".equals(this.token)) {
+			var =  new VariableInteger(this.tos.getValueOf(this.terminal),
+					this.tos.isIdSigned(this.terminal),
+					this.tos.getMaxLengthOf(this.terminal));
 			matchNextToken("IDENTIFIER");
 		}
 		else if("INTEGER".equals(this.token)) {
+			var = new VariableInteger(this.terminal,
+					this.terminal.matches("^-.*"),
+					this.terminal.length());
 			matchNextToken("INTEGER");
 		}
 		else if("TRUE_KEYWORD".equals(this.token)) {
@@ -529,6 +613,7 @@ public class Parser {
 		else if("FALSE_KEYWORD".equals(this.token)) {
 			matchNextToken("FALSE_KEYWORD");
 		}
+		return var;
 	}
 	
 	private void ifRule() {

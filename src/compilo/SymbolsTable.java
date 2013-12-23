@@ -34,7 +34,8 @@ public class SymbolsTable {
 	
 	/**
 	 * <p>Table of symbols</p>
-	 * <p>Name, Initialization, Type (signed int, unsigned int), digits</p>
+	 * <p>Name, Initialization, Type (signed int, unsigned int), digits,
+	 * current value</p>
 	 */
 	private List<String[]> tos;
 	
@@ -118,13 +119,13 @@ public class SymbolsTable {
 			output += this.labels.get(i) + "\t" + this.labels.get(i+1) + "\n";
 		}
 		output+="\n";
-		output+="Name \t Initial value \t Type \t Digits\n";
+		output+="Name \t Initial value \t Type \t Digits \t Current Value\n";
 		
 		Iterator<String[]> it = this.tos.iterator();
 		while(it.hasNext()) {
 			String[] str = it.next();
 		//for(String[] str : this.tos) {
-			output+=str[0]+"\t"+str[1]+"\t"+str[2]+"\t"+str[3]+"\n";
+			output+=str[0]+"\t"+str[1]+"\t"+str[2]+"\t"+str[3]+"\t"+str[4]+"\n";
 		}
 		return output;
 	}
@@ -159,11 +160,70 @@ public class SymbolsTable {
 	
 	public void newEntry(String[] entry) {
 		//Adding directly entry doesn't work, we would give the address of the array, not its values.
-		String[] tmp = {"","","", ""};
+		String[] tmp = {"","","", "", ""};
 		tmp[0] = entry[0];
 		tmp[1] = entry[1];
 		tmp[2] = entry[2];
 		tmp[3] = entry[3];
+		tmp[4] = entry[4];
 		this.tos.add(tmp);
+	}
+	
+	/**
+	 * Searches for the identifier in the table and returns its id.
+	 * @param id - Identifier
+	 * @return 
+	 * 		index of the identifier in the table<br />
+	 * 		-1 if not found.
+	 */
+	public int getIndexOf(String id) {
+		for(int i=0;i<this.tos.size();i++) {
+			String[] str = this.tos.get(i);
+			if(id.equals(str[0])) {
+				return i;
+			}
+		}
+		return -1;//if not found
+	}
+	
+	public int getMaxLengthOf(String id) {
+		int index = getIndexOf(id);
+		if(index != -1) {
+			String[] tmp = this.tos.get(index);
+			return Integer.parseInt(tmp[3]);
+		}
+		else {
+			return -1;
+		}
+	}
+	
+	public String getValueOf(String id) {
+		int index = getIndexOf(id);
+		if(index != -1) {
+			String[] tmp = this.tos.get(index);
+			return tmp[4];
+		}
+		else {
+			return null;
+		}
+	}
+	
+	public boolean isIdSigned(String id) {
+		int index = getIndexOf(id);
+		if(index != -1) {
+			String[] tmp = this.tos.get(index);
+			if("signed int".equals(tmp[2])) {
+				return true;
+			}
+			else if("unsigned int".equals(tmp[2])) {
+				return false;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
 	}
 }

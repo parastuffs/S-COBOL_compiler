@@ -46,7 +46,7 @@ public class Main {
 	 * @see LexicalAnalyzer#printSymbolsTable()
 	 */
 	public static void main(String[] args) {
-	
+		
 		SymbolsTable tos = new SymbolsTable();
 		LexicalAnalyzer lex = new LexicalAnalyzer(tos);
 		Parser parser = new Parser(lex, tos);

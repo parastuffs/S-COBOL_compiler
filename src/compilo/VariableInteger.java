@@ -2,11 +2,11 @@ package compilo;
 
 public class VariableInteger {
 	
-	private int value;
+	private String value;
 	private boolean signed;
 	private int maxDigits;
 	
-	public VariableInteger(int v, boolean s, int mD) {
+	public VariableInteger(String v, boolean s, int mD) {
 		this.value = v;
 		this.signed = s;
 		this.maxDigits = mD;
@@ -16,11 +16,19 @@ public class VariableInteger {
 		return this.signed;
 	}
 	
-	public int getValue() {
+	public String getValue() {
 		return this.value;
+	}
+	
+	public void setValue(String v) {
+		this.value = v;
 	}
 	
 	public int getMaxDigits() {
 		return this.maxDigits;
+	}
+	
+	public void setMaxDigits(int m) {
+		this.maxDigits = m;
 	}
 }
