@@ -49,7 +49,9 @@ public class Main {
 		
 		SymbolsTable tos = new SymbolsTable();
 		LexicalAnalyzer lex = new LexicalAnalyzer(tos);
-		Parser parser = new Parser(lex, tos);
+		LLVMGenerator llvm = new LLVMGenerator();
+		Parser parser = new Parser(lex, tos, llvm);
+		//llvm.toFile("output.ll");
 		
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(

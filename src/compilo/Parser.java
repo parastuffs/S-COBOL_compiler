@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 public class Parser {
 
 	private LexicalAnalyzer lex;
+	private LLVMGenerator llvm;
 	private String input;
 	private String token, terminal;
 	private int lineNum;
@@ -34,8 +35,9 @@ public class Parser {
 	/** List of all the labels (ie methods). @see Parser#label()*/
 	private List<String> performList;
 
-	public Parser(LexicalAnalyzer l, SymbolsTable tos) {
+	public Parser(LexicalAnalyzer l, SymbolsTable tos, LLVMGenerator llvm) {
 		this.tos = tos;
+		this.llvm = llvm;
 		this.programId = null;
 		this.lex = l;
 		this.lineNum = -1;
@@ -71,6 +73,8 @@ public class Parser {
 		checkCallList();
 		
 		System.out.println(this.tos.toString());
+		
+		this.llvm.toFile("output.ll");
 	}
 	
 	/**
@@ -269,6 +273,8 @@ public class Parser {
 		varDeclTail();
 		
 		this.tos.newEntry(this.tosEntry);
+		this.llvm.newVariable(this.tosEntry[0], this.tosEntry[1], this.tosEntry[3]);
+		
 		this.tosEntry[0] = "";
 		this.tosEntry[1] = "";
 		this.tosEntry[2] = "";
