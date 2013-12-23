@@ -1,5 +1,8 @@
 package compilo;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,13 +29,19 @@ public class Parser {
 	private VariableInteger varRightEq;
 	private VariableInteger varLeftAnd;
 	private VariableInteger varRightAnd;
-	
+	/**List of all the calls. @see Parser#call() */
+	private List<String> callList;
+	/** List of all the labels (ie methods). @see Parser#label()*/
+	private List<String> performList;
+
 	public Parser(LexicalAnalyzer l, SymbolsTable tos) {
 		this.tos = tos;
 		this.programId = null;
 		this.lex = l;
 		this.lineNum = -1;
 		this.newLine = true;
+		this.callList = new ArrayList<String>();
+		this.performList = new ArrayList<String>();
 	}
 	
 	/**
@@ -59,7 +68,43 @@ public class Parser {
 		this.input = input;
 		nextToken();
 		program();
+		checkCallList();
+		
 		System.out.println(this.tos.toString());
+	}
+	
+	/**
+	 * <p>Checks if all the procedure are called.</p>
+	 * <p>Checks if all the procedure called exists.</p>
+	 * 
+	 * <p>The callList and performList are populated during
+	 * the parsing.</p>
+	 * 
+	 * @see Parser#call()
+	 * @see Parser#label()
+	 */
+	private void checkCallList() {
+		if(!this.callList.isEmpty()) {
+			for(int i=this.callList.size()-1;i>=0;i--) {
+			//for(String str : this.callList) {
+				String str = this.callList.get(i);
+				if(this.performList.contains(str)) {
+					this.performList.remove(str);
+					this.callList.remove(str);
+				}
+			}
+		}
+		if(!this.callList.isEmpty()) {
+			for(String str : this.callList) {
+				new RaiseError("The '"+str+"' procedure has not been found.\n");
+			}
+		}
+		this.performList.remove("start");//Never called.
+		if(!this.performList.isEmpty()) {
+			for(String str : this.performList) {
+				new RaiseWarning("The '"+str+"' procedure has not been called.\n");
+			}
+		}
 	}
 	
 	private void matchNextToken(String toMatch) {
@@ -295,6 +340,9 @@ public class Parser {
 	
 	private void label() {
 		//Gives the name of a method, like 'start' or 'find'
+		if(!this.performList.contains(this.terminal)) {
+			this.performList.add(this.terminal);
+		}
 		matchNextToken("IDENTIFIER");
 	}
 	
@@ -572,10 +620,7 @@ public class Parser {
 		if("MULTIPLICATION_SIGN".equals(this.token)) {
 			matchNextToken("MULTIPLICATION_SIGN");
 			this.varRightMult = expNot();//Now it should be time to do left * right
-			//TODO en fait, si les variables ne sont pas initialisées, on ne peut rien faire.
-			//Du coup, il faudrait d'abord vérifier que le terminal a bien une valeur assignée
-			//dans la table des symboles. Si oui, on calcule, si non, on remonte simplement
-			//l'image avec le plus grand nombre de digits (worst case scenario).
+			
 			if(this.varLeftMult != null && this.varRightMult != null) {
 				if(!"".equals(this.varLeftMult.getValue()) && !"".equals(this.varRightMult.getValue())) {
 					this.varLeftMult.setValue(Integer.toString(
@@ -695,6 +740,9 @@ public class Parser {
 	
 	private void call() {
 		matchNextToken("PERFORM_KEYWORD");
+		if(!this.callList.contains(this.terminal)) {
+			this.callList.add(this.terminal);
+		}
 		matchNextToken("IDENTIFIER");
 		callTail();
 	}
