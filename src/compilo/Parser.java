@@ -347,7 +347,7 @@ public class Parser {
 			//Need to check the number of digits
 			int maxLengthTo = this.tos.getMaxLengthOf(this.terminal);
 			if(maxLengthTo == -1) {
-				new RaiseError(this.terminal+" has not been initialiazed.");
+				new RaiseError(this.terminal+" has not been declared properly.");
 			}
 			if(maxLengthTo < moveFrom.getMaxDigits()) {
 				new RaiseWarning("Warning: "+this.terminal+" will contain "+
@@ -357,16 +357,46 @@ public class Parser {
 			endInst();
 		}
 		else if("COMPUTE_KEYWORD".equals(this.token)) {
+			VariableInteger computedExp = null;
 			matchNextToken("COMPUTE_KEYWORD");
+			
+			int maxLengthTo = this.tos.getMaxLengthOf(this.terminal);
+			if(maxLengthTo == -1) {
+				new RaiseError(this.terminal+" has not been declared properly.");
+			}
 			matchNextToken("IDENTIFIER");
 			matchNextToken("EQUALS_SIGN");
-			expression();
+			computedExp = expression();
+			if(maxLengthTo < computedExp.getMaxDigits()) {
+				new RaiseWarning("Warning: "+this.terminal+" will contain "+
+						computedExp.getMaxDigits()+" instead of maximum "+maxLengthTo);
+			}
 			endInst();
 		}
 		else if("ADD_KEYWORD".equals(this.token)) {
+			//In an addition, we will have at most the highest number number of digits
+			//of one of the operand +1.
+			VariableInteger addThis = null;
+			
 			matchNextToken("ADD_KEYWORD");
-			expression();
+			addThis = expression();
 			matchNextToken("TO_KEYWORD");
+
+			if(!"".equals(this.tos.getValueOf(this.terminal)) && !"".equals(addThis.getValue())) {
+				int maxLengthTo = this.tos.getMaxLengthOf(this.terminal);		
+				if(maxLengthTo == -1) {
+					new RaiseError(this.terminal+" has not been declared properly.");
+				}
+				//Maximum length between the two operands
+				int maxLengthOp = (this.tos.getValueOf(this.terminal).length() >= addThis.getValue().length())?
+						this.tos.getValueOf(this.terminal).length():
+							addThis.getValue().length();
+				if(maxLengthOp > this.tos.getMaxLengthOf(this.terminal)) {
+					new RaiseWarning("Warning: "+this.terminal+" may contain a number composed of " +
+							maxLengthOp+" digits, its limit being "+this.tos.getMaxLengthOf(this.terminal));
+				}
+			}
+			
 			matchNextToken("IDENTIFIER");
 			endInst();
 		}
@@ -506,7 +536,21 @@ public class Parser {
 		}
 		else if("MINUS_SIGN".equals(this.token)) {
 			matchNextToken("MINUS_SIGN");
-			//TODO
+			
+			if(this.varLeftAdd != null && this.varRightAdd != null) {
+				if(!"".equals(this.varLeftAdd.getValue()) && !"".equals(this.varRightAdd.getValue())) {
+					this.varLeftAdd.setValue(Integer.toString(
+							(Integer.parseInt(this.varLeftAdd.getValue())
+							-Integer.parseInt(this.varRightAdd.getValue()))));
+					this.varLeftAdd.setMaxDigits(this.varLeftAdd.getValue().length());
+				}
+				else {
+					int maxDigits = (this.varLeftAdd.getMaxDigits()>=this.varRightAdd.getMaxDigits())?
+							this.varLeftAdd.getMaxDigits():this.varRightAdd.getMaxDigits();
+					this.varLeftAdd.setMaxDigits(maxDigits);
+				}
+			}
+			
 			expMult();
 			expAddLR();
 		}
@@ -550,7 +594,21 @@ public class Parser {
 		}
 		else if("DIVISION_SIGN".equals(this.token)) {
 			matchNextToken("DIVISION_SIGN");
-			//TODO
+			
+			if(this.varLeftMult != null && this.varRightMult != null) {
+				if(!"".equals(this.varLeftMult.getValue()) && !"".equals(this.varRightMult.getValue())) {
+					this.varLeftMult.setValue(Integer.toString(
+							(Integer.parseInt(this.varLeftMult.getValue())
+							/Integer.parseInt(this.varRightMult.getValue()))));
+					this.varLeftMult.setMaxDigits(this.varLeftMult.getValue().length());
+				}
+				else {
+					int maxDigits = (this.varLeftMult.getMaxDigits()>=this.varRightMult.getMaxDigits())?
+							this.varLeftMult.getMaxDigits():this.varRightMult.getMaxDigits();
+					this.varLeftMult.setMaxDigits(maxDigits);
+				}
+			}
+			
 			expNot();
 			expMultLR();
 		}
