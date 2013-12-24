@@ -314,6 +314,7 @@ public class Parser {
 		matchNextToken("PROCEDURE_KEYWORD");
 		matchNextToken("DIVISION_KEYWORD");
 		endInst();
+		this.llvm.newProcedure(this.terminal);
 		matchNextToken("IDENTIFIER");
 		matchNextToken("SECTION_KEYWORD");
 		endInst();
@@ -349,6 +350,7 @@ public class Parser {
 		if(!this.performList.contains(this.terminal)) {
 			this.performList.add(this.terminal);
 		}
+		this.llvm.newLabel(this.terminal);
 		matchNextToken("IDENTIFIER");
 	}
 	

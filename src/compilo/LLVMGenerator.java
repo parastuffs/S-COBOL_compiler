@@ -7,9 +7,10 @@ import java.io.IOException;
 public class LLVMGenerator {
 	
 	private String code = "";
+	private boolean firstLabel;
 
 	public LLVMGenerator() {
-		
+		this.firstLabel = true;
 	}
 	
 	public void newVariable(String name, String value, String maxDigits) {
@@ -29,6 +30,22 @@ public class LLVMGenerator {
 			numb += "9";
 		}
 		return Integer.parseInt(numb);
+	}
+	
+	public void newProcedure(String proc) {
+		String procedure = "define void @"+proc+"()";
+		procedure+="\n";
+		this.code += procedure;
+	}
+	
+	public void newLabel(String lab) {
+		if(firstLabel) {
+			lab = "entry";
+			firstLabel = false;
+		}
+		String label = "\t"+lab+":";
+		label+="\n";
+		this.code += label;
 	}
 	
 	public void toFile(String filename) {
