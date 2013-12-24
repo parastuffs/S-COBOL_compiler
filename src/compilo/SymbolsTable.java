@@ -89,7 +89,6 @@ public class SymbolsTable {
 	 * @see SymbolsTable#labels
 	 */
 	public void addLabel(String[] newLab) {
-		System.out.println("symbolsTable.addLabel: line "+newLab[1]+ " with '"+newLab[0]+"'");
 		if(this.labels.contains(newLab[0])) {
 			if(!this.labels.get(this.labels.lastIndexOf(newLab[0])+1).equals(newLab[1])) {
 				this.labels.add(newLab[0]);
@@ -124,7 +123,6 @@ public class SymbolsTable {
 		Iterator<String[]> it = this.tos.iterator();
 		while(it.hasNext()) {
 			String[] str = it.next();
-		//for(String[] str : this.tos) {
 			output+=str[0]+"\t"+str[1]+"\t"+str[2]+"\t"+str[3]+"\t"+str[4]+"\n";
 		}
 		return output;

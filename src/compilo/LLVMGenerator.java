@@ -4,18 +4,20 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * Main class of the LLVM generator.
+ * Instanciation of this class is invoked during the parsing.
+ *
+ */
 public class LLVMGenerator {
-	
+	/**Main String code of the generated LLVM IR.*/
 	private String code = "";
 	/**Code to append, like conditions and such.*/
 	private String toAppend = "";
+	/**First label is called 'entry'*/
 	private boolean firstLabel;
-	private int ifCount=0;
+	/**Count to automatically increment the section name*/
 	private int ifThenCount=0;
-	private int ifElseCount=0;
-	private int ifEndCount=0;
-	private int performCount=0;
-	private String localVar = "";
 	/** Says whether we are inside an if statement or not. */
 	private boolean inCondition = false;
 	private String currentLabel;
@@ -29,6 +31,14 @@ public class LLVMGenerator {
 		this.firstLabel = true;
 	}
 	
+	/**
+	 * Declares a global variable
+	 * @param name Name of the variable
+	 * @param value Value of the variable
+	 * @param maxDigits Maximum digits of the variable.
+	 * 				Used to determine the number of bits needed for
+	 * 				its representation.
+	 */
 	public void declareVariable(String name, String value, String maxDigits) {
 		String var = "@"+name+" = i";
 		int maxNumber = maxNumbFromMaxDigits(Integer.parseInt(maxDigits));
@@ -39,6 +49,10 @@ public class LLVMGenerator {
 		this.code += var;
 	}
 	
+	/**
+	 * Local temporary variable.
+	 * @param var Variable to store.
+	 */
 	public void newLocalVariable(String var) {
 		String str = "%temp = alloca i32\n";
 		str += "%temp = load i32* @"+var+"\n";
@@ -104,11 +118,9 @@ public class LLVMGenerator {
 	public void newVariable(String val) {
 		if(this.val1 == null) {
 			this.val1 = val;
-			//System.out.println("val1 now is '"+this.val1+"'");
 		}
 		else if(this.val1 != null) {
 			this.val2 = val;
-			//System.out.println("val2 now is '"+this.val2+"'");
 		}
 	}
 
@@ -127,6 +139,10 @@ public class LLVMGenerator {
 		}
 	}
 	
+	/**
+	 * The not operation simply operates a xor with 1
+	 * on the variable.
+	 */
 	public void notOperation() {
 		String op = "";
 		if(this.val1.matches("^[a-zA-Z]")) {
@@ -156,6 +172,10 @@ public class LLVMGenerator {
 		}
 	}
 	
+	/**
+	 * Computing the opposite of a number is subtracting its
+	 * value to zero and storing the result in itself.
+	 */
 	public void oppositeOperation() {
 		String op = "";
 		if(this.val1.matches("^[a-zA-Z]")) {
@@ -251,6 +271,12 @@ public class LLVMGenerator {
 		}
 	}
 	
+	/**
+	 * Separated from the {@link LLVMGenerator#arthimOperation(String)}
+	 * because S-COBOL handles the two forms of the subtraction differently.
+	 * sub i32 %a, %b is a-b, but subtract a from b is b-a.
+	 * This methods handles the second sort.
+	 */
 	public void subtract() {
 		String op = "";
 		//Both variables
@@ -328,6 +354,19 @@ public class LLVMGenerator {
 		}
 	}
 	
+	/**
+	 * Different condition types.
+	 * @param condType
+	 * 		<ul><li>eq</li>
+	 * 			<li>neq</li>
+	 * 			<li>sle</li>
+	 * 			<li>slt</li>
+	 * 			<li>sge</li>
+	 * 			<li>sgt</li>
+	 * 		</ul>
+	 * @param left Left operand
+	 * @param right Right operand
+	 */
 	public void condition(String condType, String left, String right) {
 		String str = "";
 		//Both variables
@@ -368,6 +407,10 @@ public class LLVMGenerator {
 		}
 	}
 	
+	/**
+	 * Needs to create a new section in order to handle
+	 * the result of the condition.
+	 */
 	public void ifStatement() {
 		String str = "br i1 %cond, label %ifthen."+this.ifThenCount+
 				"label %ifthen."+Integer.toString(this.ifThenCount+1);
@@ -407,6 +450,11 @@ public class LLVMGenerator {
 		this.inCondition = false;
 	}
 	
+	/**
+	 * Display the String argument on the standard output
+	 * using @putchar(i32).
+	 * @param output String to display
+	 */
 	public void display(String output) {
 		String str = "";
 		char[] charArray = output.toCharArray();
@@ -424,8 +472,8 @@ public class LLVMGenerator {
 	
 	/**
 	 * Read an integer on the standard input.
-	 * Code from the 8th practical of INFOF403.
-	 * @param toId
+	 * <strong>Code from the 8th practical of INFOF403.</strong>
+	 * @param toId Variable in which store the input.
 	 */
 	public void readInput(String toId) {
 		String str = "";
@@ -464,13 +512,18 @@ public class LLVMGenerator {
 	}
 	
 	
-	
+	/**
+	 * Merge the two code Strings.
+	 */
 	public void finalizeCode() {
 		this.code += "\n"+this.toAppend;
 	}
 	
+	/**
+	 * Write the code to a file.
+	 * @param filename File name.
+	 */
 	public void toFile(String filename) {
-		System.out.println("code llvm: \n"+this.code);
 		FileOutputStream out;
 		try {
 			out = new FileOutputStream(filename);

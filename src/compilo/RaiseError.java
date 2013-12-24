@@ -1,5 +1,9 @@
 package compilo;
 
+/**
+ * Prints error message on the error output.
+ *
+ */
 public class RaiseError {
 	
 	public RaiseError(String message) {

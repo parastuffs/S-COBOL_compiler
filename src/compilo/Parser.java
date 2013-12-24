@@ -1,11 +1,15 @@
 package compilo;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Main class of the parsing and the semantic analysis.
+ *
+ * The LLVM code generator is also invoked during the parsing.
+ */
 public class Parser {
 
 	private LexicalAnalyzer lex;
@@ -13,29 +17,28 @@ public class Parser {
 	private String input;
 	private String token, terminal;
 	private int lineNum;
+	/** name of the program. Has to be consistent.*/
 	private String programId;
-	
 	/** Tells whether we are on a new line or not.*/
 	private boolean newLine;
 	private SymbolsTable tos;
-
 	/**Name, Initialization, Type, Digits, Current Value*/
 	private String[] tosEntry = {"", "", "", "", ""};
-	
+
 	private VariableInteger varLeftMult=null;
 	private VariableInteger varRightMult=null;
 	private VariableInteger varLeftAdd;
 	private VariableInteger varRightAdd;
 	private VariableInteger varLeftEq;
 	private VariableInteger varRightEq;
-	private VariableInteger varLeftAnd;
-	private VariableInteger varRightAnd;
+	//private VariableInteger varRightAnd;
 	/**List of all the calls. @see Parser#call() */
 	private List<String> callList;
 	/** List of all the labels (ie methods). @see Parser#label()*/
 	private List<String> performList;
-	
+	/** Usefull for the LLVM generator. */
 	private boolean multiplying = false;
+	/** Usefull for the LLVM generator. */
 	private boolean dividing = false;
 
 	public Parser(LexicalAnalyzer l, SymbolsTable tos, LLVMGenerator llvm) {
@@ -57,25 +60,27 @@ public class Parser {
 		this.input = this.input.replaceAll("^\\ *", "");//Removes all the preceding white spaces.
 		if(this.newLine) {
 			this.lineNum ++;
-			//System.out.println("New line. input='"+this.input+"'");
 		}
 		lexCouple = this.lex.nextToken(this.input, this.newLine, this.lineNum);
 		this.token = lexCouple[1];//We know consider that the token is the lexical unit...
 		this.terminal = lexCouple[0];//... and the token becomes the terminal.
-		//TODO check if token == ERROR
-		
-		//TESTS ###
-		
-		//###
+//		if("ERROR".equals(this.token)) {
+//			new RaiseError("Error during the lexical analysis.");
+//		}
 	}
 	
+	/**
+	 * Launches the parser, then check the call list, the asks
+	 * the LLVM generator to finalize the code, then to write
+	 * it into a file.
+	 * @param input Whole code as one single String.
+	 */
 	public void parse(String input) {
 		this.input = input;
 		nextToken();
 		program();
 		checkCallList();
 		
-		System.out.println(this.tos.toString());
 		this.llvm.finalizeCode();
 		this.llvm.toFile("output.ll");
 	}
@@ -121,23 +126,18 @@ public class Parser {
 			}
 			this.terminal = escapeChar(this.terminal);
 			this.input = this.input.replaceFirst(this.terminal, "");
-			//System.out.println("Match successful of '"+this.token+"' (terminal='"+this.terminal+"'");
-			//System.out.println("Left on the input: '"+this.input+"'");
 		}
 		else {
 			System.err.println("Error trying to match tos='"+toMatch+"' with '"+this.token+
 					"' (which is '"+this.terminal+"')");
 		}
 		
-		//TODO remove dead code
-		//do {
-			nextToken();
-			//Comments are simply ignored by the parser
-			if("COMMENT".equals(this.token)) {
-				//this.llvm.newComment(this.terminal);//Not absolutely necessary
-				matchNextToken("COMMENT");
-			}
-		//} while("COMMENT".equals(this.token));
+		nextToken();
+		//Comments are simply ignored by the parser
+		if("COMMENT".equals(this.token)) {
+			//this.llvm.newComment(this.terminal);//Not absolutely necessary
+			matchNextToken("COMMENT");
+		}
 		this.newLine = false;
 	}
 	
@@ -147,7 +147,6 @@ public class Parser {
 		data();
 		proc();
 		matchNextToken("FINAL_SYMBOL");//Match the final Symbol
-		
 		//this.lex.printSymbolsTable();
 	}
 	
@@ -174,11 +173,6 @@ public class Parser {
 		this.newLine = true;//We just ended a line, thus begining a new one.
 		this.llvm.newLine();
 		matchNextToken("END_OF_INSTRUCTION");
-		//TEST ###
-//		System.out.println("End of line, thus new line.");
-//		System.out.println("Next terminal: '"+this.terminal+"'");
-//		System.out.println("line="+this.lineNum);
-		//###
 	}
 	
 	private void words() {
@@ -190,10 +184,6 @@ public class Parser {
 			matchNextToken("INTEGER");//INTEGER
 			wordsLR();
 		}
-		
-		//TODO PROBLEM: word (300 BNC) is first recognized as an integer.
-		//TODO add the rule to the grammar
-		
 	}
 	
 	private void wordsLR() {
@@ -208,7 +198,6 @@ public class Parser {
 		else if("DOT_KEYWORD".equals(this.token)) {
 			//Nothing to do, this is the \varespilon clause.
 		}
-		
 	}
 	
 	private void env() {
@@ -240,7 +229,6 @@ public class Parser {
 	
 	private void varList() {
 		if("INTEGER".equals(this.token)) {
-			//System.out.println("Inside varList.INTEGER");
 			varDecl();
 			varList();
 		}
@@ -551,7 +539,8 @@ public class Parser {
 		//TODO LLVM
 		if("AND_KEYWORD".equals(this.token)) {
 			matchNextToken("AND_KEYWORD");
-			this.varRightAnd = expEqual();
+			//this.varRightAnd = expEqual();
+			expEqual();
 			expAndLR();
 		}
 		else if("OR_KEYWORD".equals(this.token)) {
@@ -831,7 +820,6 @@ public class Parser {
 			matchNextToken("UNTIL_KEYWORD");
 			expression();
 			this.llvm.untilCondition();
-			System.out.println("callTrail>UNTIL>juste before endInst();");
 			endInst();
 		}
 		else if("END_OF_INSTRUCTION".equals(this.token)) {
@@ -861,7 +849,6 @@ public class Parser {
 			endInst();
 		}
 		else if("STRING".equals(this.token)) {
-			//System.out.println("writeTail>else if\"STRING\", just before matchNextToken(STRING)");
 			this.llvm.display(this.terminal);
 			matchNextToken("STRING");
 			endInst();
@@ -893,22 +880,6 @@ public class Parser {
 				}
 			}
 		}
-	}
-	
-	/**
-	 * <p>Un-escape the special characters</p>
-	 * <p>Removes the brackets around the special characters
-	 * so that the working String can be subtracted to the main
-	 * String being analyzed.
-	 * </p>
-	 * @param input
-	 * 				String containing special characters previously escaped.
-	 * @return The same String with the special characters not escaped anymore.
-	 */
-	private static String unEscpaceChar(String input) {
-		input = input.replaceAll("\\[", "");
-		input = input.replaceAll("\\]", "");
-		return input;
 	}
 	
 	/**

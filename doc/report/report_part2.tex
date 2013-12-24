@@ -23,14 +23,54 @@
 \usepackage{verbatim}
 \usepackage{longtable}
 \usepackage{array}
-\usepackage{rotating}
 
 \newcounter{rule}
 \newcommand{\addRule}[2]{%
 	\stepcounter{rule} [\arabic{rule}] & #1 & $\rightarrow$ & #2 \tabularnewline
 }
  
+\title{INFO-F-403 Introduction to Language Theory and Compilation\\Project Part 2: \textsc{S-COBOL} Parsing, Semantic Analysis and Code Generation.}
+\author{\textsc{Delhaye} Quentin}
+ 
 \begin{document}
+\maketitle
+
+%%%%%%%%
+%%%%%%%%
+\section{Introduction}
+The aim of this second part was to build a syntax analyzer (parser), semantic analyzer and code generator (to LLVM IR).
+
+Firstly, the grammar had to be made LL(1) compliant, then the parser could be build.
+
+\section{Grammar}
+The table~\ref{tab:grammar} present the rules of the grammar.
+
+The following modifications were applied:
+\begin{itemize}
+	\item removal of the left recursion in the various rules.
+		Each time a left recursion occured, the rule has been split
+		as presented in table~\ref{tab:leftRec}.
+	\item Fusion of the common left parts.
+	\item Transformations to respect the priorities of the operators.
+	\item Addition of the rules \texttt{4} and \texttt{6} so that
+		\texttt{WORD} can be an \texttt{INTEGER}.
+	\item Removal of the right recursion in the rules derived from
+		the variable \texttt{<EXP\_EQUAL\_LR>}. Indeed, having a language
+		accepting semantics like \texttt{a < b > c = d} makes no sense.
+\end{itemize}
+
+%\begin{table}[!h]
+%	\centering
+\begin{longtable}{lll}
+	A & $\rightarrow$ & Aa \tabularnewline
+	  & becomes & \tabularnewline
+	A & $\rightarrow$ & aA\_LR \tabularnewline
+	A\_LR & $\rightarrow$ & aA\_LR \tabularnewline
+	& $\rightarrow$ & $\varepsilon$ \tabularnewline
+	\caption{Example of the removal of the left recursion in rule A.}
+	\label{tab:leftRec}
+\end{longtable}
+%\end{table}
 
 \begin{longtable}{lll>{\raggedright}p{10cm}}
 	\addRule{<PROGRAM>}{<IDENT><ENV><DATA><PROC>}
@@ -111,6 +151,8 @@
 	\addRule{<WRITE\_TAIL>}{<EXPRESSION><END\_INST>}
 	\addRule{}{STRING<END\_INST>}
 
+	\caption{LL(1) grammar of the S-COBOL language.}
+	\label{tab:grammar}
 \end{longtable}
 
 \begin{longtable}{l>{\raggedright}p{6cm}p{6cm}}
@@ -154,7 +196,7 @@
 	<READ> & accept & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
 	<WRITE> & display & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
 	<WRITE\_TAIL> & STRING, -, not, (, ID, INTEGER, true, false & move, compute, add, substract, multiply, divide, if, perform, accept, display, stop, $\varepsilon$ \\
-
+	\caption{First and Follow table.}
 \end{longtable}
 
 \newpage
@@ -199,6 +241,7 @@
 	<READ> & & & & & & & \\
 	<WRITE> & & & & & & & \\
 	<WRITE\_TAIL> & & 75 & & & & 75 & \\
+	\caption{Action table (1/5).}
 \end{longtable}
 
 \newpage
@@ -243,6 +286,7 @@
 	<READ> & & & & & & & \\
 	<WRITE> & & & & & & & \\
 	<WRITE\_TAIL> & & & & & & & \\
+	\caption{Action table (2/5).}
 \end{longtable}
 
 
@@ -288,6 +332,7 @@
 	<READ> & & 72 & & & & & & & \\
 	<WRITE>& & & 73 & & & & & & \\
 	<WRITE\_TAIL> & & & & & 75 & 75 & 75 & 75 & 75 \\
+	\caption{Action table (3/5).}
 \end{longtable}
 
 \newpage
@@ -332,6 +377,7 @@
 	<READ>  & & & & & & & & & & & & & & \\
 	<WRITE> & & & & & & & & & & & & & & \\
 	<WRITE\_TAIL>  & & & & & & & & & & & & & & \\
+	\caption{Action table (4/5).}
 \end{longtable}
 
 
@@ -377,46 +423,63 @@
 	<READ>  & & & & & & & & \\
 	<WRITE> & & & & & & & & \\
 	<WRITE\_TAIL> & & 76 & & & & & & \\
+	\caption{Action table (5/5).}
 \end{longtable}
 
-%	<PROGRAM>
-%	<IDENT>
-%	<WORDS> 
-%	<WORDS\_LR> 
-%	<END\_INST>
-%	<ENV>
-%	<DATA> 
-%	<VAR\_LIST>
-%	<VAR\_DECL> 
-%	<VAR\_DECL\_TAIL>
-%	<LEVEL>
-%	<PROC>
-%	<LABELS>
-%	<LABELS\_LR> 
-%	<LABEL> 
-%	<INSTRUCTION\_LIST>
-%	<INSTRUCTION>
-%	<ASSIGNATION>
-%	<ASSIGN\_END>
-%	<EXPRESSION> 
-%	<EXPRESSION\_LR>
-%	<EXP\_AND> 
-%	<EXP\_AND\_LR>
-%	<EXP\_EQUAL> 
-%	<EXP\_EQUAL\_LR>
-%	<EXP\_ADD> 
-%	<EXP\_ADD\_LR>
-%	<EXP\_MULT> 
-%	<EXP\_MULT\_LR>
-%	<EXP\_NOT> 
-%	<EXP\_PARENTHESIS> 
-%	<EXP\_TERM> 
-%	<IF> 
-%	<IF\_END> 
-%	<CALL> 
-%	<CALL\_TAIL>
-%	<READ> 
-%	<WRITE>
-%	<WRITE\_TAIL> 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Implementation}
+\subsection{\texttt{Parser} Class}
+This class mainly handles the parsing and the semantic analysis.
+
+Each rule of the grammar has been implemented in recursive methods.
+The parser can be accessed from the outside via the \texttt{parse(String)}
+method, which takes as argument the String to parse (typically the source
+code).
+
+\subsection{\texttt{RaiseError} Class}
+Whenever a problematic situation is encountered, one of those object is created.
+Its main purpose is to write on the error output the error message.
+
+\subsection{\texttt{WarningError} Class}
+Works just like \texttt{RaiseError}, but throw a warning instead of an error.
+
+\subsection{\texttt{LLVMGenerator} Class}
+This class has a method for every functionnality of the S-COBOL language
+that may be translated into LLVM IR.
+
+It writes the code in a String, and finally write it into a file
+upon external sollicitation of \texttt{toFile(String)} (the argument being
+the filename.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Semantic analysis}
+The following particularities are verified:
+\begin{itemize}
+	\item every variable can not be assigned with a number longer than
+		what its declaration authorizes (the length of a number being
+		the number of digits composing it). To serve that purpose,
+		the types of the variables are transmited to the parent nodes
+		in the recursive tree.
+	\item The call list is checked at the end of the parsing. If a section
+		is called without having been declared, an error is raised. If a
+		section is declared without having been called, a warning is
+		called.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Limitation of the current implementation}
+This section acts as a conclusion and presents what is left to be improved.
+
+\begin{itemize}
+	\item The \texttt{OR} and \texttt{AND} keywords are not generated in
+		the \texttt{LLVM IR} code.
+	\item The order of some variables in the \texttt{LLVM IR} generated
+		code are in reverse order.
+	\item If an error is raised during the parsing, the execution is not
+		stoped.
+\end{itemize}
+
 
 \end{document}
+
+

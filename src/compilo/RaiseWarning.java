@@ -1,9 +1,13 @@
 package compilo;
 
+/**
+ * Write a warning message on the standard output.
+ *
+ */
 public class RaiseWarning {
 
 	
 	public RaiseWarning(String message) {
-		System.err.println("Warning Raised:\n\t"+message+"\n");
+		System.out.println("Warning Raised:\n\t"+message+"\n");
 	}
 }
