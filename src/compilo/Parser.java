@@ -76,7 +76,7 @@ public class Parser {
 		checkCallList();
 		
 		System.out.println(this.tos.toString());
-		
+		this.llvm.finalizeCode();
 		this.llvm.toFile("output.ll");
 	}
 	
@@ -794,41 +794,43 @@ public class Parser {
 	}
 	
 	private void ifRule() {
-		//TODO LLVM
 		matchNextToken("IF_KEYWORD");
 		expression();
+		this.llvm.ifStatement();
 		matchNextToken("THEN_KEYWORD");
 		instructionList();
 		ifEnd();
 	}
 	
 	private void ifEnd() {
-		//TODO LLVM
 		if("ELSE_KEYWORD".equals(this.token)) {
 			matchNextToken("ELSE_KEYWORD");
+			this.llvm.elseStatement();
 			instructionList();
+			this.llvm.endIfStatement();
 			matchNextToken("ENDI-IF_KEYWORD");
 		}
 		else if("ENDI-IF_KEYWORD".equals(this.token)) {
+			this.llvm.endIfStatement();
 			matchNextToken("ENDI-IF_KEYWORD");
 		}
 	}
 	
 	private void call() {
-		//TODO LLVM
 		matchNextToken("PERFORM_KEYWORD");
 		if(!this.callList.contains(this.terminal)) {
 			this.callList.add(this.terminal);
 		}
+		this.llvm.jumpTo(this.terminal);
 		matchNextToken("IDENTIFIER");
 		callTail();
 	}
 	
 	private void callTail() {
-		//TODO LLVM
 		if("UNTIL_KEYWORD".equals(this.token)) {
 			matchNextToken("UNTIL_KEYWORD");
 			expression();
+			this.llvm.untilCondition();
 			System.out.println("callTrail>UNTIL>juste before endInst();");
 			endInst();
 		}
@@ -838,29 +840,29 @@ public class Parser {
 	}
 	
 	private void read() {
-		//TODO LLVM
 		matchNextToken("ACCEPT_KEYWORD");
+		this.llvm.readInput(this.terminal);
 		matchNextToken("IDENTIFIER");
 		endInst();
 	}
 	
 	private void write() {
-		//TODO LLVM
 		matchNextToken("DISPLAY_KEYWORD");
 		writeTail();
 	}
 	
 	private void writeTail() {
-		//TODO LLVM
 		if("OPENING_PARENTHESIS".equals(this.token) || "IDENTIFIER".equals(this.token) ||
 				"INTEGER".equals(this.token) || "TRUE_KEYWORD".equals(this.token) ||
 				"FALSE_KEYWORD".equals(this.token) || "MINUS_SIGN".equals(this.token)||
 				"NOT_KEYWORD".equals(this.token)) {
 			expression();
+			this.llvm.display(this.varLeftEq.getValue());
 			endInst();
 		}
 		else if("STRING".equals(this.token)) {
-			System.out.println("writeTail>else if\"STRING\", just before matchNextToken(STRING)");
+			//System.out.println("writeTail>else if\"STRING\", just before matchNextToken(STRING)");
+			this.llvm.display(this.terminal);
 			matchNextToken("STRING");
 			endInst();
 		}

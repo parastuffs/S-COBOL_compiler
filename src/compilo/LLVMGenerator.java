@@ -7,11 +7,18 @@ import java.io.IOException;
 public class LLVMGenerator {
 	
 	private String code = "";
+	/**Code to append, like conditions and such.*/
+	private String toAppend = "";
 	private boolean firstLabel;
-	private int ifThenCount;
-	private int ifElseCount;
-	private int ifEndCount;
+	private int ifCount=0;
+	private int ifThenCount=0;
+	private int ifElseCount=0;
+	private int ifEndCount=0;
+	private int performCount=0;
 	private String localVar = "";
+	/** Says whether we are inside an if statement or not. */
+	private boolean inCondition = false;
+	private String currentLabel;
 	
 	/**Unnamed variable*/
 	private int unamedVal = 0;
@@ -35,12 +42,22 @@ public class LLVMGenerator {
 	public void newLocalVariable(String var) {
 		String str = "%temp = alloca i32\n";
 		str += "%temp = load i32* @"+var+"\n";
-		this.code += str;
+		if(this.inCondition) {
+			this.toAppend += str;
+		}
+		else {
+			this.code += str;
+		}
 	}
 	
 	public void compute() {
 		String str = "store i32 +"+this.val1+", i32* %temp\n";
-		this.code += str;
+		if(this.inCondition) {
+			this.toAppend += str;
+		}
+		else {
+			this.code += str;
+		}
 	}
 	
 	private int maxNumbFromMaxDigits(int maxDigits) {
@@ -62,11 +79,22 @@ public class LLVMGenerator {
 			firstLabel = false;
 		}
 		String label = "\t"+lab+":";
-		this.code += label;
+		if(this.inCondition) {
+			this.toAppend += label;
+		}
+		else {
+			this.code += label;
+		}
+		this.currentLabel = lab;
 	}
 	
 	public void newLine() {
-		this.code += "\n";
+		if(this.inCondition) {
+			this.toAppend += "\n";
+		}
+		else {
+			this.code += "\n";
+		}
 	}
 	
 	/**
@@ -76,11 +104,11 @@ public class LLVMGenerator {
 	public void newVariable(String val) {
 		if(this.val1 == null) {
 			this.val1 = val;
-			System.out.println("val1 now is '"+this.val1+"'");
+			//System.out.println("val1 now is '"+this.val1+"'");
 		}
 		else if(this.val1 != null) {
 			this.val2 = val;
-			System.out.println("val2 now is '"+this.val2+"'");
+			//System.out.println("val2 now is '"+this.val2+"'");
 		}
 	}
 
@@ -91,7 +119,12 @@ public class LLVMGenerator {
 	
 	public void newComment(String comment) {
 		comment = comment.replaceFirst("[/*]", ";");
-		this.code += comment;
+		if(this.inCondition) {
+			this.toAppend += comment;
+		}
+		else {
+			this.code += comment;
+		}
 	}
 	
 	public void notOperation() {
@@ -115,8 +148,12 @@ public class LLVMGenerator {
 			this.unamedVal++;
 		}
 		this.val1 = "%"+Integer.toString(this.unamedVal-1);
-		this.code += op;
-		this.code += "\n";
+		if(this.inCondition) {
+			this.toAppend += op+"\n";
+		}
+		else {
+			this.code += op+"\n";
+		}
 	}
 	
 	public void oppositeOperation() {
@@ -136,8 +173,12 @@ public class LLVMGenerator {
 			this.unamedVal++;
 		}
 		this.val1 = "%"+Integer.toString(this.unamedVal-1);
-		this.code += op;
-		this.code += "\n";
+		if(this.inCondition) {
+			this.toAppend += op+"\n";
+		}
+		else {
+			this.code += op+"\n";
+		}
 	}
 	
 	/**
@@ -202,8 +243,12 @@ public class LLVMGenerator {
 			this.unamedVal++;
 		}
 		this.val1 = "%"+Integer.toString(this.unamedVal-1);
-		this.code += op;
-		this.code += "\n";
+		if(this.inCondition) {
+			this.toAppend += op+"\n";
+		}
+		else {
+			this.code += op+"\n";
+		}
 	}
 	
 	public void subtract() {
@@ -245,8 +290,12 @@ public class LLVMGenerator {
 			this.unamedVal++;
 		}
 		this.val1 = "%"+Integer.toString(this.unamedVal-1);
-		this.code += op;
-		this.code += "\n";
+		if(this.inCondition) {
+			this.toAppend += op+"\n";
+		}
+		else {
+			this.code += op+"\n";
+		}
 	}
 	
 	public void store() {
@@ -271,8 +320,12 @@ public class LLVMGenerator {
 			op += "\nstore i32 %"+this.val1+", i32 "+this.val2;
 			this.unamedVal++;
 		}
-		this.code += op;
-		this.code += "\n";
+		if(this.inCondition) {
+			this.toAppend += op+"\n";
+		}
+		else {
+			this.code += op+"\n";
+		}
 	}
 	
 	public void condition(String condType, String left, String right) {
@@ -307,8 +360,113 @@ public class LLVMGenerator {
 		else {
 			str += "\n%cond = icmp "+condType+" i32 "+this.val2+", "+this.val1;
 		}
+		if(this.inCondition) {
+			this.toAppend += str+"\n";
+		}
+		else {
+			this.code += str+"\n";
+		}
+	}
+	
+	public void ifStatement() {
+		String str = "br i1 %cond, label %ifthen."+this.ifThenCount+
+				"label %ifthen."+Integer.toString(this.ifThenCount+1);
+		this.code+=str+"\n";
+		this.inCondition = true;
+		newLabel("ifthen."+this.ifThenCount);
+		this.ifThenCount++;
+	}
+	
+	public void elseStatement() {
+		newLabel("ifthen."+this.ifThenCount);
+	}
+	
+	public void endIfStatement() {
+		this.inCondition = false;
+	}
+	
+	public void jumpTo(String label) {
+		String str = "br label %ifThen."+this.ifThenCount+"\n";
 		this.code += str;
-		this.code += "\n";
+		this.inCondition = true;
+		newLabel("ifthen."+this.ifThenCount);//New section for the loop
+		str = "br label %"+label+"\n";//Jump to wanted section
+		//expression() in the parser will then add the condition.
+		this.toAppend += str;
+		
+		this.currentLabel = "ifthen."+this.ifThenCount;
+		this.ifThenCount++;
+	}
+	
+	/**
+	 * Do nothing if true, loop if false.
+	 */
+	public void untilCondition() {
+		String str = "br i1 %cond, , label %"+this.currentLabel+"\n";
+		this.toAppend += str;
+		this.inCondition = false;
+	}
+	
+	public void display(String output) {
+		String str = "";
+		char[] charArray = output.toCharArray();
+		for(char c : charArray) {
+			str += "call i32 @putchar(i32 "+c+")\n";
+		}
+		
+		if(this.inCondition) {
+			this.toAppend += str+"\n";
+		}
+		else {
+			this.code += str+"\n";
+		}
+	}
+	
+	/**
+	 * Read an integer on the standard input.
+	 * Code from the 8th practical of INFOF403.
+	 * @param toId
+	 */
+	public void readInput(String toId) {
+		String str = "";
+		str += "%res = load i32* @"+toId+"\n";
+		str += "%digit = alloca i32\n";
+		str += "store i32 0 , i32 * %res\n";
+		str += "br label %read\n";
+		this.code += str;
+		
+		str = "read:\n";
+		str += "%"+this.unamedVal+" = call i32 @getchar ()\n";
+		this.unamedVal++;//0 => 1
+		str += "%"+this.unamedVal+" = sub i32 %"+Integer.toString(this.unamedVal-1)+", 48\n";
+		this.unamedVal++;//1 => 2
+		str += "store i32 %"+Integer.toString(this.unamedVal-1)+" , i32 * %digit\n";
+		str += "%"+this.unamedVal+" = icmp ne i32 %"+Integer.toString(this.unamedVal-2)+" , 10\n";
+		this.unamedVal++;//2 => 3
+		str += "br i1 %"+Integer.toString(this.unamedVal-1)+" , label %save , label %exit\n";
+		str += "save:\n";
+		str += "%"+this.unamedVal+" = load i32 * %res\n";
+		this.unamedVal++;//3=>4
+		str += "%"+this.unamedVal+" = load i32 * %digit\n";
+		this.unamedVal++;//4=>5
+		str += "%"+this.unamedVal+" = mul i32 %"+Integer.toString(this.unamedVal-2)+" , 10\n";
+		this.unamedVal++;//5=>6
+		str += "%"+this.unamedVal+" = add i32 %"+Integer.toString(this.unamedVal-1)+" , %"+Integer.toString(this.unamedVal-2)+"\n";
+		this.unamedVal++;//6=>7
+		str += "store i32 %"+Integer.toString(this.unamedVal-1)+" , i32 * %res\n";
+		str+= "br label %read\n";
+		str+= "exit:\n";
+		str += "%"+this.unamedVal+" = load i32 * %res\n";
+		this.unamedVal++;//7=>8
+		str += "ret i32 %"+Integer.toString(this.unamedVal-1)+"\n";
+		this.toAppend+= str;
+
+	}
+	
+	
+	
+	public void finalizeCode() {
+		this.code += "\n"+this.toAppend;
 	}
 	
 	public void toFile(String filename) {
