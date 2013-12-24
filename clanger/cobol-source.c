@@ -21,4 +21,6 @@ int main() {
 	if(b == 5) {
 		b = 1;
 	}
+
+	int d = (a+b)-c;
 }

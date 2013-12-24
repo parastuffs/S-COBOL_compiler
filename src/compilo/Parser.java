@@ -34,6 +34,9 @@ public class Parser {
 	private List<String> callList;
 	/** List of all the labels (ie methods). @see Parser#label()*/
 	private List<String> performList;
+	
+	private boolean multiplying = false;
+	private boolean dividing = false;
 
 	public Parser(LexicalAnalyzer l, SymbolsTable tos, LLVMGenerator llvm) {
 		this.tos = tos;
@@ -131,6 +134,7 @@ public class Parser {
 			nextToken();
 			//Comments are simply ignored by the parser
 			if("COMMENT".equals(this.token)) {
+				//this.llvm.newComment(this.terminal);//Not absolutely necessary
 				matchNextToken("COMMENT");
 			}
 		//} while("COMMENT".equals(this.token));
@@ -167,8 +171,8 @@ public class Parser {
 	}
 	
 	private void endInst() {
-		//TODO LLVM => \n
 		this.newLine = true;//We just ended a line, thus begining a new one.
+		this.llvm.newLine();
 		matchNextToken("END_OF_INSTRUCTION");
 		//TEST ###
 //		System.out.println("End of line, thus new line.");
@@ -187,7 +191,8 @@ public class Parser {
 			wordsLR();
 		}
 		
-		//TODO PROBLEM: word (300 BNC) is first recognized as an integer.	
+		//TODO PROBLEM: word (300 BNC) is first recognized as an integer.
+		//TODO add the rule to the grammar
 		
 	}
 	
@@ -274,7 +279,7 @@ public class Parser {
 		varDeclTail();
 		
 		this.tos.newEntry(this.tosEntry);
-		this.llvm.newVariable(this.tosEntry[0], this.tosEntry[1], this.tosEntry[3]);
+		this.llvm.declareVariable(this.tosEntry[0], this.tosEntry[1], this.tosEntry[3]);
 		
 		this.tosEntry[0] = "";
 		this.tosEntry[1] = "";
@@ -397,7 +402,6 @@ public class Parser {
 	
 	private void assignation() {
 		if("MOVE_KEYWORD".equals(this.token)) {
-			//TODO LLVM
 			matchNextToken("MOVE_KEYWORD");
 			VariableInteger moveFrom = expression();
 			matchNextToken("TO_KEYWORD");
@@ -411,7 +415,9 @@ public class Parser {
 				new RaiseWarning("Warning: "+this.terminal+" will contain "+
 						moveFrom.getMaxDigits()+" instead of maximum "+maxLengthTo);
 			}
+			this.llvm.newVariable(this.terminal);
 			matchNextToken("IDENTIFIER");
+			this.llvm.store();
 			endInst();
 		}
 		else if("COMPUTE_KEYWORD".equals(this.token)) {
@@ -422,6 +428,7 @@ public class Parser {
 			if(maxLengthTo == -1) {
 				new RaiseError(this.terminal+" has not been declared properly.");
 			}
+			this.llvm.newLocalVariable(this.terminal);
 			matchNextToken("IDENTIFIER");
 			matchNextToken("EQUALS_SIGN");
 			computedExp = expression();
@@ -429,6 +436,7 @@ public class Parser {
 				new RaiseWarning("Warning: "+this.terminal+" will contain "+
 						computedExp.getMaxDigits()+" instead of maximum "+maxLengthTo);
 			}
+			this.llvm.compute();
 			endInst();
 		}
 		else if("ADD_KEYWORD".equals(this.token)) {
@@ -454,40 +462,63 @@ public class Parser {
 							maxLengthOp+" digits, its limit being "+this.tos.getMaxLengthOf(this.terminal));
 				}
 			}
-			
+
+			this.llvm.newVariable(this.terminal);
 			matchNextToken("IDENTIFIER");
+			this.llvm.arthimOperation("addition");
 			endInst();
 		}
 		else if("SUBSTRACT_KEYWORD".equals(this.token)) {
 			matchNextToken("SUBSTRACT_KEYWORD");
 			expression();
 			matchNextToken("FROM_KEYWORD");
+
+			this.llvm.newVariable(this.terminal);
+			this.llvm.subtract();
+			
 			matchNextToken("IDENTIFIER");
 			endInst();
 		}
 		else if("MULTIPLY_KEYWORD".equals(this.token)) {
 			matchNextToken("MULTIPLY_KEYWORD");
+			this.multiplying = true;
 			assignEnd();
 			endInst();
 		}
 		else if("DIVIDE_KEYWORD".equals(this.token)) {
 			matchNextToken("DIVIDE_KEYWORD");
+			this.dividing = true;
 			assignEnd();
 			endInst();
 		}
+		
+		this.llvm.resetVars();
 	}
 	
 	private void assignEnd() {
-		//TODO LLVM
 		expression();
 		matchNextToken("COMMA");
 		expression();
+		
+		if(this.multiplying) {
+			this.llvm.arthimOperation("multiplication");
+		}
+		else if(this.dividing) {
+			this.llvm.arthimOperation("division");
+		}
+			
 		matchNextToken("GIVING_KEYWORD");
+
+		this.llvm.newLocalVariable(this.terminal);
+		
 		matchNextToken("IDENTIFIER");
+		
+		this.llvm.compute();
+		this.dividing = false;
+		this.multiplying = false;
 	}
 	
 	private VariableInteger expression() {
-		//TODO LLVM
 		VariableInteger varInt = expAnd();
 		expressionLR();
 		return varInt;
@@ -529,13 +560,11 @@ public class Parser {
 	}
 	
 	private VariableInteger expEqual() {
-		//TODO LLVM
 		this.varLeftEq = expAdd();
 		return expEqualLR();
 	}
 	
 	private VariableInteger expEqualLR() {
-		//TODO LLVM
 		if("EQUALS_SIGN".equals(this.token)) {
 			matchNextToken("EQUALS_SIGN");
 			this.varRightEq = expAdd();
@@ -550,23 +579,29 @@ public class Parser {
 							this.varLeftEq.getMaxDigits():this.varRightEq.getMaxDigits();
 					this.varLeftEq.setMaxDigits(maxDigits);
 				}
+				
+				this.llvm.condition("eq", this.varLeftEq.getValue(), this.varRightEq.getValue());
 			}
 		}
 		else if("LOWER_THAN".equals(this.token)) {
 			matchNextToken("LOWER_THAN");
-			expAdd();
+			this.varRightEq = expAdd();
+			this.llvm.condition("slt", this.varLeftEq.getValue(), this.varRightEq.getValue());
 		}
 		else if("GREATER_THAN".equals(this.token)) {
 			matchNextToken("GREATER_THAN");
-			expAdd();
+			this.varRightEq = expAdd();
+			this.llvm.condition("sgt", this.varLeftEq.getValue(), this.varRightEq.getValue());
 		}
 		else if("LOWER_OR_EQUAL".equals(this.token)) {
 			matchNextToken("LOWER_OR_EQUAL");
-			expAdd();
+			this.varRightEq = expAdd();
+			this.llvm.condition("sle", this.varLeftEq.getValue(), this.varRightEq.getValue());
 		}
 		else if("GREATER_OR_EQUAL".equals(this.token)) {
 			matchNextToken("GREATER_OR_EQUAL");
-			expAdd();
+			this.varRightEq = expAdd();
+			this.llvm.condition("sge", this.varLeftEq.getValue(), this.varRightEq.getValue());
 		}
 		else if("AND_KEYWORD".equals(this.token)) {
 			//epsilon
@@ -576,16 +611,17 @@ public class Parser {
 	}
 	
 	private VariableInteger expAdd() {
-		//TODO LLVM
 		this.varLeftAdd = expMult();
 		return expAddLR();
 	}
 	
 	private VariableInteger expAddLR() {
-		//TODO LLVM
 		if("PLUS_SIGN".equals(this.token)) {
 			matchNextToken("PLUS_SIGN");
 			this.varRightAdd = expMult();
+			
+			this.llvm.arthimOperation("addition");
+			
 			if(this.varLeftAdd != null && this.varRightAdd != null) {
 				if(!"".equals(this.varLeftAdd.getValue()) && !"".equals(this.varRightAdd.getValue())) {
 					this.varLeftAdd.setValue(Integer.toString(
@@ -603,6 +639,9 @@ public class Parser {
 		}
 		else if("MINUS_SIGN".equals(this.token)) {
 			matchNextToken("MINUS_SIGN");
+			expMult();
+			
+			this.llvm.arthimOperation("subtraction");
 			
 			if(this.varLeftAdd != null && this.varRightAdd != null) {
 				if(!"".equals(this.varLeftAdd.getValue()) && !"".equals(this.varRightAdd.getValue())) {
@@ -618,7 +657,6 @@ public class Parser {
 				}
 			}
 			
-			expMult();
 			expAddLR();
 		}
 		else if("EQUALS_SIGN".equals(this.token) || "LOWER_THAN".equals(this.token) ||
@@ -631,17 +669,17 @@ public class Parser {
 	}
 	
 	private VariableInteger expMult() {
-		//TODO LLVM
 		this.varLeftMult = expNot();//
 		return expMultLR();
 	}
 	
 	private VariableInteger expMultLR() {
-		//TODO LLVM
 		if("MULTIPLICATION_SIGN".equals(this.token)) {
 			matchNextToken("MULTIPLICATION_SIGN");
 			this.varRightMult = expNot();//Now it should be time to do left * right
 			
+			//Now that we have the two operands, we can ask llvm to do the operation:
+			this.llvm.arthimOperation("multiplication");
 			if(this.varLeftMult != null && this.varRightMult != null) {
 				if(!"".equals(this.varLeftMult.getValue()) && !"".equals(this.varRightMult.getValue())) {
 					this.varLeftMult.setValue(Integer.toString(
@@ -660,6 +698,9 @@ public class Parser {
 		}
 		else if("DIVISION_SIGN".equals(this.token)) {
 			matchNextToken("DIVISION_SIGN");
+			this.varRightMult = expNot();
+			
+			this.llvm.arthimOperation("division");
 			
 			if(this.varLeftMult != null && this.varRightMult != null) {
 				if(!"".equals(this.varLeftMult.getValue()) && !"".equals(this.varRightMult.getValue())) {
@@ -675,7 +716,6 @@ public class Parser {
 				}
 			}
 			
-			expNot();
 			expMultLR();
 		}
 		else if("PLUS_SIGN".equals(this.token) || "MINUS_SIGN".equals(this.token)) {
@@ -685,15 +725,22 @@ public class Parser {
 	}
 	
 	private VariableInteger expNot() {
-		//TODO LLVM
 		VariableInteger var = null;
 		if("MINUS_SIGN".equals(this.token)) {
 			matchNextToken("MINUS_SIGN");
+			if("FALSE_KEYWORD".equals(this.token) || "TRUE_KEYWORD".equals(this.token)) {
+				new RaiseError("Trying to do '- "+this.terminal+"', this makes no sense.");
+			}
 			expNot();
+			this.llvm.oppositeOperation();
 		}
 		else if("NOT_KEYWORD".equals(this.token)) {
 			matchNextToken("NOT_KEYWORD");
+			if("MINUS_SIGN".equals(this.token)) {
+				new RaiseError("Trying to do 'not "+this.terminal+"', this makes no sense.");
+			}
 			expNot();
+			this.llvm.notOperation();
 		}
 		else if("OPENING_PARENTHESIS".equals(this.token) || "IDENTIFIER".equals(this.token) ||
 				"INTEGER".equals(this.token) || "TRUE_KEYWORD".equals(this.token) ||
@@ -704,7 +751,7 @@ public class Parser {
 	}
 	
 	private VariableInteger expressionParenthesis() {
-		//TODO LLVM
+		//Parenthesis are not explicitly written in llvm.
 		VariableInteger var=null;
 		if("OPENING_PARENTHESIS".equals(this.token)) {
 			matchNextToken("OPENING_PARENTHESIS");
@@ -720,30 +767,34 @@ public class Parser {
 	}
 	
 	private VariableInteger expTerm() {
-		//TODO LLVM
 		VariableInteger var=null;
 		if("IDENTIFIER".equals(this.token)) {
 			var =  new VariableInteger(this.tos.getValueOf(this.terminal),
 					this.tos.isIdSigned(this.terminal),
 					this.tos.getMaxLengthOf(this.terminal));
+			this.llvm.newVariable(this.terminal);
 			matchNextToken("IDENTIFIER");
 		}
 		else if("INTEGER".equals(this.token)) {
 			var = new VariableInteger(this.terminal,
 					this.terminal.matches("^-.*"),
 					this.terminal.length());
+			this.llvm.newVariable(this.terminal);
 			matchNextToken("INTEGER");
 		}
 		else if("TRUE_KEYWORD".equals(this.token)) {
+			this.llvm.newVariable(this.terminal);
 			matchNextToken("TRUE_KEYWORD");
 		}
 		else if("FALSE_KEYWORD".equals(this.token)) {
+			this.llvm.newVariable(this.terminal);
 			matchNextToken("FALSE_KEYWORD");
 		}
 		return var;
 	}
 	
 	private void ifRule() {
+		//TODO LLVM
 		matchNextToken("IF_KEYWORD");
 		expression();
 		matchNextToken("THEN_KEYWORD");
@@ -752,6 +803,7 @@ public class Parser {
 	}
 	
 	private void ifEnd() {
+		//TODO LLVM
 		if("ELSE_KEYWORD".equals(this.token)) {
 			matchNextToken("ELSE_KEYWORD");
 			instructionList();
@@ -763,6 +815,7 @@ public class Parser {
 	}
 	
 	private void call() {
+		//TODO LLVM
 		matchNextToken("PERFORM_KEYWORD");
 		if(!this.callList.contains(this.terminal)) {
 			this.callList.add(this.terminal);
@@ -772,6 +825,7 @@ public class Parser {
 	}
 	
 	private void callTail() {
+		//TODO LLVM
 		if("UNTIL_KEYWORD".equals(this.token)) {
 			matchNextToken("UNTIL_KEYWORD");
 			expression();
@@ -784,17 +838,20 @@ public class Parser {
 	}
 	
 	private void read() {
+		//TODO LLVM
 		matchNextToken("ACCEPT_KEYWORD");
 		matchNextToken("IDENTIFIER");
 		endInst();
 	}
 	
 	private void write() {
+		//TODO LLVM
 		matchNextToken("DISPLAY_KEYWORD");
 		writeTail();
 	}
 	
 	private void writeTail() {
+		//TODO LLVM
 		if("OPENING_PARENTHESIS".equals(this.token) || "IDENTIFIER".equals(this.token) ||
 				"INTEGER".equals(this.token) || "TRUE_KEYWORD".equals(this.token) ||
 				"FALSE_KEYWORD".equals(this.token) || "MINUS_SIGN".equals(this.token)||

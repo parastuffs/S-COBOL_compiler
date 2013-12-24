@@ -11,6 +11,7 @@ target triple = "i386-pc-linux-gnu"
 define i32 @main() #0 {
 entry:
   %retval = alloca i32, align 4
+  %d = alloca i32, align 4
   store i32 0, i32* %retval
   %call = call i32 (i8*, ...)* @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8]* @.str, i32 0, i32 0), i32* @a)
   %call1 = call i32 (i8*, ...)* @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8]* @.str, i32 0, i32 0), i32* @b)
@@ -54,8 +55,14 @@ if.then7:                                         ; preds = %if.end5
   br label %if.end8
 
 if.end8:                                          ; preds = %if.then7, %if.end5
-  %7 = load i32* %retval
-  ret i32 %7
+  %7 = load i32* @a, align 4
+  %8 = load i32* @b, align 4
+  %add9 = add nsw i32 %7, %8
+  %9 = load i32* @c, align 4
+  %sub10 = sub nsw i32 %add9, %9
+  store i32 %sub10, i32* %d, align 4
+  %10 = load i32* %retval
+  ret i32 %10
 }
 
 declare i32 @__isoc99_scanf(i8*, ...) #1
