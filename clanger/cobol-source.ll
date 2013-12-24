@@ -10,9 +10,52 @@ target triple = "i386-pc-linux-gnu"
 ; Function Attrs: nounwind
 define i32 @main() #0 {
 entry:
+  %retval = alloca i32, align 4
+  store i32 0, i32* %retval
   %call = call i32 (i8*, ...)* @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8]* @.str, i32 0, i32 0), i32* @a)
   %call1 = call i32 (i8*, ...)* @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8]* @.str, i32 0, i32 0), i32* @b)
-  ret i32 0
+  %0 = load i32* @a, align 4
+  %1 = load i32* @b, align 4
+  %cmp = icmp eq i32 %0, %1
+  br i1 %cmp, label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+  %2 = load i32* @b, align 4
+  %add = add nsw i32 %2, 1
+  store i32 %add, i32* @a, align 4
+  br label %if.end5
+
+if.else:                                          ; preds = %entry
+  %3 = load i32* @a, align 4
+  %4 = load i32* @b, align 4
+  %cmp2 = icmp sgt i32 %3, %4
+  br i1 %cmp2, label %if.then3, label %if.else4
+
+if.then3:                                         ; preds = %if.else
+  %5 = load i32* @b, align 4
+  %sub = sub nsw i32 %5, 1
+  store i32 %sub, i32* @a, align 4
+  br label %if.end
+
+if.else4:                                         ; preds = %if.else
+  store i32 0, i32* @a, align 4
+  br label %if.end
+
+if.end:                                           ; preds = %if.else4, %if.then3
+  br label %if.end5
+
+if.end5:                                          ; preds = %if.end, %if.then
+  %6 = load i32* @b, align 4
+  %cmp6 = icmp eq i32 %6, 5
+  br i1 %cmp6, label %if.then7, label %if.end8
+
+if.then7:                                         ; preds = %if.end5
+  store i32 1, i32* @b, align 4
+  br label %if.end8
+
+if.end8:                                          ; preds = %if.then7, %if.end5
+  %7 = load i32* %retval
+  ret i32 %7
 }
 
 declare i32 @__isoc99_scanf(i8*, ...) #1

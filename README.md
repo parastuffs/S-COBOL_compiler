@@ -27,4 +27,4 @@ variables; they will all be global. This particularity will allow us to use the 
 in an easier way; we can simply find a variable in the table using its identifier (which
 will thus be unique).
 
-
+>clang cobol-source.c -S -emit-llvm -o cobol-source.ll

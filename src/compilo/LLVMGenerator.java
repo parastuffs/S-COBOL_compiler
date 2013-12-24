@@ -8,6 +8,9 @@ public class LLVMGenerator {
 	
 	private String code = "";
 	private boolean firstLabel;
+	private int ifThenCount;
+	private int ifElseCount;
+	private int ifEndCount;
 
 	public LLVMGenerator() {
 		this.firstLabel = true;

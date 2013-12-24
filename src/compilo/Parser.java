@@ -167,6 +167,7 @@ public class Parser {
 	}
 	
 	private void endInst() {
+		//TODO LLVM => \n
 		this.newLine = true;//We just ended a line, thus begining a new one.
 		matchNextToken("END_OF_INSTRUCTION");
 		//TEST ###
@@ -396,6 +397,7 @@ public class Parser {
 	
 	private void assignation() {
 		if("MOVE_KEYWORD".equals(this.token)) {
+			//TODO LLVM
 			matchNextToken("MOVE_KEYWORD");
 			VariableInteger moveFrom = expression();
 			matchNextToken("TO_KEYWORD");
@@ -476,6 +478,7 @@ public class Parser {
 	}
 	
 	private void assignEnd() {
+		//TODO LLVM
 		expression();
 		matchNextToken("COMMA");
 		expression();
@@ -484,6 +487,7 @@ public class Parser {
 	}
 	
 	private VariableInteger expression() {
+		//TODO LLVM
 		VariableInteger varInt = expAnd();
 		expressionLR();
 		return varInt;
@@ -491,6 +495,7 @@ public class Parser {
 	
 	private void expressionLR() {
 		if("OR_KEYWORD".equals(this.token)) {
+			//TODO LLVM
 			matchNextToken("OR_KEYWORD");
 			expAnd();
 			expressionLR();
@@ -505,12 +510,14 @@ public class Parser {
 	}
 	
 	private VariableInteger expAnd() {
+		//TODO LLVM
 		VariableInteger var = expEqual();
 		expAndLR();
 		return var;
 	}
 	
 	private void expAndLR() {
+		//TODO LLVM
 		if("AND_KEYWORD".equals(this.token)) {
 			matchNextToken("AND_KEYWORD");
 			this.varRightAnd = expEqual();
@@ -522,11 +529,13 @@ public class Parser {
 	}
 	
 	private VariableInteger expEqual() {
+		//TODO LLVM
 		this.varLeftEq = expAdd();
 		return expEqualLR();
 	}
 	
 	private VariableInteger expEqualLR() {
+		//TODO LLVM
 		if("EQUALS_SIGN".equals(this.token)) {
 			matchNextToken("EQUALS_SIGN");
 			this.varRightEq = expAdd();
@@ -567,11 +576,13 @@ public class Parser {
 	}
 	
 	private VariableInteger expAdd() {
+		//TODO LLVM
 		this.varLeftAdd = expMult();
 		return expAddLR();
 	}
 	
 	private VariableInteger expAddLR() {
+		//TODO LLVM
 		if("PLUS_SIGN".equals(this.token)) {
 			matchNextToken("PLUS_SIGN");
 			this.varRightAdd = expMult();
@@ -620,11 +631,13 @@ public class Parser {
 	}
 	
 	private VariableInteger expMult() {
+		//TODO LLVM
 		this.varLeftMult = expNot();//
 		return expMultLR();
 	}
 	
 	private VariableInteger expMultLR() {
+		//TODO LLVM
 		if("MULTIPLICATION_SIGN".equals(this.token)) {
 			matchNextToken("MULTIPLICATION_SIGN");
 			this.varRightMult = expNot();//Now it should be time to do left * right
@@ -672,6 +685,7 @@ public class Parser {
 	}
 	
 	private VariableInteger expNot() {
+		//TODO LLVM
 		VariableInteger var = null;
 		if("MINUS_SIGN".equals(this.token)) {
 			matchNextToken("MINUS_SIGN");
@@ -690,6 +704,7 @@ public class Parser {
 	}
 	
 	private VariableInteger expressionParenthesis() {
+		//TODO LLVM
 		VariableInteger var=null;
 		if("OPENING_PARENTHESIS".equals(this.token)) {
 			matchNextToken("OPENING_PARENTHESIS");
@@ -705,6 +720,7 @@ public class Parser {
 	}
 	
 	private VariableInteger expTerm() {
+		//TODO LLVM
 		VariableInteger var=null;
 		if("IDENTIFIER".equals(this.token)) {
 			var =  new VariableInteger(this.tos.getValueOf(this.terminal),
